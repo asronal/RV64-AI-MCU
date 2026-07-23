@@ -30,7 +30,7 @@ The system architecture is categorized into four primary design domains:
 * **Custom AI Extensions (`xt_a.v`)**: Custom ISA extension interfaces for domain-specific AI instruction execution.
 
 ### 4. Peripherals & Security Subsystem (`*_ps.v`)
-* **SoC Top Wrapper (`soc_ps.v`)**: `rv64_ai_soc_top` top-level integration wrapper exposing external interface pins and bus topologies.
+* **SoC Top Wrapper (`soc_top_ps.v`)**: `rv64_ai_soc_top` top-level integration wrapper exposing external interface pins and bus topologies.
 * **Security & Crypto (`sec_ps.v`, `crypto_ps.v`, `pmp_ps.v`)**: Hardware Root-of-Trust, cryptographic coprocessor (AES/SHA support), and Physical Memory Protection (PMP) units.
 * **Interrupt & Debug Management (`plic_ps.v`, `dbg_ps.v`, `trace_ps.v`, `jtag_ps.v`, `brk_ps.v`)**: RISC-V compliant Platform-Level Interrupt Controller (PLIC), JTAG debug interface, hardware execution tracing, and breakpoint controllers.
 * **Peripheral Suite**: Multi-channel UART (`uart_ps.v`, `uart2_ps.v`), SPI/QSPI (`spi_ps.v`, `spi2_ps.v`, `qspi_ps.v`), I2C (`i2c_ps.v`, `i2c2_ps.v`), CAN bus (`can_ps.v`), USB 2.0 (`usb_ps.v`), GPIO (`gpio_ps.v`), PWM (`pwm_ps.v`), ADC interface (`adc_ps.v`), and system clock/reset management (`clk_ps.v`).
@@ -90,7 +90,7 @@ To maintain modularity and structural clarity across the flat RTL tree, files fo
 | `tdma_a.v` | Tensor Direct Memory Access (TDMA) controller | AI Accelerator |
 | `xt_a.v` | Custom ISA extension interface for AI operations | AI Accelerator |
 | `tpupkg_a.v` | TPU subsystem package parameters | AI Accelerator |
-| `soc_ps.v` | Top-level SoC peripheral wrapper (`rv64_ai_soc_top`) | Peripheral / SoC |
+| `soc_top_ps.v` | Top-level SoC peripheral wrapper (`rv64_ai_soc_top`) | Peripheral / SoC |
 | `plic_ps.v` | Platform-Level Interrupt Controller (PLIC) | Security / System |
 | `pmp_ps.v` | Physical Memory Protection (PMP) unit | Security / System |
 | `sec_ps.v` | Hardware Root-of-Trust security controller | Security / System |

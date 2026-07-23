@@ -1,0 +1,8 @@
+# Simulation outputs
+*.out
+*.vcd
+*.log
+
+# Design Compiler work & log directories
+work/
+logs/

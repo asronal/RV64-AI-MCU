@@ -1,6 +1,7 @@
 module rv64_ai_memory_subsystem (
   input  clk,
   input  rst_n,
+  input  init,
   input  [63:0] addr,
   input  [63:0] wdata,
   input  [7:0]  wstrb,
@@ -23,11 +24,18 @@ module rv64_ai_memory_subsystem (
   reg [63:0] otp [0:OTP_SIZE/8-1];
   reg [63:0] icache [0:I_CACHE_SIZE/8-1];
   reg [63:0] dcache [0:D_CACHE_SIZE/8-1];
+  integer i;
 
-  always @(posedge clk or negedge rst_n) begin
-    if (!rst_n) begin
+  always @(posedge clk or posedge init or negedge rst_n) begin
+    if (!rst_n || init) begin
       valid <= 1'b0;
       rdata <= 64'b0;
+      for (i = 0; i < BOOT_ROM_SIZE/8; i = i + 1) boot_rom[i] <= 64'b0;
+      for (i = 0; i < INTERNAL_SRAM_SIZE/8; i = i + 1) internal_sram[i] <= 64'b0;
+      for (i = 0; i < TENSOR_SRAM_SIZE/8; i = i + 1) tensor_sram[i] <= 64'b0;
+      for (i = 0; i < OTP_SIZE/8; i = i + 1) otp[i] <= 64'b0;
+      for (i = 0; i < I_CACHE_SIZE/8; i = i + 1) icache[i] <= 64'b0;
+      for (i = 0; i < D_CACHE_SIZE/8; i = i + 1) dcache[i] <= 64'b0;
     end else begin
       valid <= read | write;
       if (read) begin

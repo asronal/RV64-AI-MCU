@@ -1,6 +1,7 @@
 module rv64_ai_spi (
   input  clk,
   input  rst_n,
+  input  init,
   input  [31:0] axil_addr,
   input  [31:0] axil_wdata,
   input  [3:0]  axil_wstrb,
@@ -19,8 +20,8 @@ module rv64_ai_spi (
   assign sclk = ctrl_reg[0];
   assign mosi = data_reg[0];
 
-  always @(posedge clk or negedge rst_n) begin
-    if (!rst_n) begin
+  always @(posedge clk or posedge init or negedge rst_n) begin
+    if (!rst_n || init) begin
       ctrl_reg <= 32'b0;
       data_reg <= 32'b0;
     end else if (axil_write) begin

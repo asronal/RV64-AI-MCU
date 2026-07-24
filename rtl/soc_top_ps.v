@@ -93,9 +93,11 @@ module rv64_ai_soc_top (
   wire [63:0] perf_counter5;
   wire [63:0] perf_counter6;
   wire [63:0] perf_counter7;
+  wire sys_init;
 
   wire [63:0] mem_addr = (core_dmem_read || core_dmem_write) ? core_dmem_addr : core_imem_addr;
   wire [63:0] mem_wdata = core_dmem_wdata;
+  assign sys_init = ~rst_n;
   wire [7:0]  mem_wstrb = core_dmem_wstrb;
   wire        mem_read  = core_dmem_read;
   wire        mem_write = core_dmem_write;
@@ -442,6 +444,7 @@ module rv64_ai_soc_top (
   rv64_ai_xtensor_extension u_xt (
     .clk(clk),
     .rst_n(rst_n),
+    .init(sys_init),
     .instr(32'b0),
     .rs1(64'b0),
     .rs2(64'b0),
@@ -505,6 +508,7 @@ module rv64_ai_soc_top (
   rv64_ai_core u_core (
     .clk(clk),
     .rst_n(rst_n),
+    .init(sys_init),
     .imem_rdata(mem_rdata),
     .imem_valid(mem_valid),
     .dmem_rdata(mem_rdata),
@@ -528,6 +532,7 @@ module rv64_ai_soc_top (
   rv64_ai_memory_subsystem u_mem (
     .clk(clk),
     .rst_n(rst_n),
+    .init(sys_init),
     .addr(mem_addr),
     .wdata(mem_wdata),
     .wstrb(mem_wstrb),

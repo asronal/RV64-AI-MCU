@@ -1,6 +1,7 @@
 module rv64_ai_dsp_coprocessor (
   input  clk,
   input  rst_n,
+  input  init,
   input  [31:0] axil_awaddr,
   input  [2:0]  axil_awprot,
   input  axil_awvalid,
@@ -70,8 +71,8 @@ module rv64_ai_dsp_coprocessor (
     .done(mac_done)
   );
 
-  always @(posedge clk or negedge rst_n) begin
-    if (!rst_n) begin
+  always @(posedge clk or posedge init or negedge rst_n) begin
+    if (!rst_n || init) begin
       ctrl_reg <= 32'b0;
       cmd_reg  <= 32'b0;
       simd_reg <= 32'b0;

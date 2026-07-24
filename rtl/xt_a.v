@@ -1,6 +1,7 @@
 module rv64_ai_xtensor_extension (
   input  clk,
   input  rst_n,
+  input  init,
   input  [31:0] instr,
   input  [63:0] rs1,
   input  [63:0] rs2,
@@ -11,8 +12,8 @@ module rv64_ai_xtensor_extension (
   wire [6:0] opcode;
   assign opcode = instr[6:0];
 
-  always @(posedge clk or negedge rst_n) begin
-    if (!rst_n) begin
+  always @(posedge clk or posedge init or negedge rst_n) begin
+    if (!rst_n || init) begin
       rd <= 64'b0;
       valid <= 1'b0;
     end else begin

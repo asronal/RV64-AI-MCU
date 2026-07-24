@@ -1,6 +1,7 @@
 module rv64_ai_core (
   input  clk,
   input  rst_n,
+  input  init,
   input  [63:0] imem_rdata,
   input  imem_valid,
   input  [63:0] dmem_rdata,
@@ -96,8 +97,8 @@ module rv64_ai_core (
     .op_type(op_type)
   );
 
-  always @(posedge clk or negedge rst_n) begin
-    if (!rst_n) begin
+  always @(posedge clk or posedge init or negedge rst_n) begin
+    if (!rst_n || init) begin
       pc_if <= 64'h0;
       pc_id <= 64'h0;
       pc_ex <= 64'h0;
@@ -171,8 +172,8 @@ module rv64_ai_core (
     end
   end
 
-  always @(posedge clk or negedge rst_n) begin
-    if (!rst_n) begin
+  always @(posedge clk or posedge init or negedge rst_n) begin
+    if (!rst_n || init) begin
       for (i = 0; i < GPR_DEPTH; i = i + 1) gpr[i] <= 64'b0;
       for (i = 0; i < BTB_DEPTH; i = i + 1) begin
         btb_target[i] <= 64'b0;

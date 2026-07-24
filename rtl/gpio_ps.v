@@ -1,6 +1,7 @@
 module rv64_ai_gpio (
   input  clk,
   input  rst_n,
+  input  init,
   input  [31:0] axil_addr,
   input  [31:0] axil_wdata,
   input  [3:0]  axil_wstrb,
@@ -18,8 +19,8 @@ module rv64_ai_gpio (
   assign gpio_io = dir_reg ? out_reg : 32'bz;
   assign in_reg = gpio_io;
 
-  always @(posedge clk or negedge rst_n) begin
-    if (!rst_n) begin
+  always @(posedge clk or posedge init or negedge rst_n) begin
+    if (!rst_n || init) begin
       dir_reg <= 32'b0;
       out_reg <= 32'b0;
     end else if (axil_write && axil_addr[7:0] == 8'h00) begin

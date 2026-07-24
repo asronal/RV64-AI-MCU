@@ -1,6 +1,7 @@
 module rv64_ai_jtag_debug (
   input  clk,
   input  rst_n,
+  input  init,
   input  [31:0] axil_addr,
   input  [31:0] axil_wdata,
   input  [3:0]  axil_wstrb,
@@ -21,8 +22,8 @@ module rv64_ai_jtag_debug (
   assign jtag_tdi = ctrl_reg[1];
   assign jtag_tck = ctrl_reg[2];
 
-  always @(posedge clk or negedge rst_n) begin
-    if (!rst_n) begin
+  always @(posedge clk or posedge init or negedge rst_n) begin
+    if (!rst_n || init) begin
       ctrl_reg <= 32'b0;
       jtag_reg <= 32'b0;
     end else if (axil_write) begin

@@ -1,6 +1,7 @@
 module rv64_ai_tpu_top (
   input  clk,
   input  rst_n,
+  input  init,
   input  [31:0] axil_addr,
   input  [31:0] axil_wdata,
   input  [3:0]  axil_wstrb,

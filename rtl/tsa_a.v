@@ -1,6 +1,7 @@
 module rv64_ai_tpu_systolic_array (
   input  clk,
   input  rst_n,
+  input  init,
   input  [255:0] wdata,
   input  [255:0] idata,
   input  valid,
@@ -11,8 +12,8 @@ module rv64_ai_tpu_systolic_array (
   reg [15:0] mac_acc [0:15][0:15];
   integer i, j;
 
-  always @(posedge clk or negedge rst_n) begin
-    if (!rst_n) begin
+  always @(posedge clk or posedge init or negedge rst_n) begin
+    if (!rst_n || init) begin
       for (i = 0; i < 16; i = i + 1) begin
         for (j = 0; j < 16; j = j + 1) begin
           mac_acc[i][j] <= 16'b0;

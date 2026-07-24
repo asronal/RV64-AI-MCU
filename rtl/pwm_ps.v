@@ -1,6 +1,7 @@
 module rv64_ai_pwm_timer_wdt_rtc (
   input  clk,
   input  rst_n,
+  input  init,
   input  [31:0] axil_addr,
   input  [31:0] axil_wdata,
   input  [3:0]  axil_wstrb,
@@ -20,8 +21,8 @@ module rv64_ai_pwm_timer_wdt_rtc (
   assign pwm_out = pwm_reg[0];
   assign irq = timer_reg[0] | wdt_reg[0] | rtc_reg[0];
 
-  always @(posedge clk or negedge rst_n) begin
-    if (!rst_n) begin
+  always @(posedge clk or posedge init or negedge rst_n) begin
+    if (!rst_n || init) begin
       pwm_reg <= 32'b0;
       timer_reg <= 32'b0;
       wdt_reg <= 32'b0;

@@ -1,6 +1,7 @@
 module rv64_ai_qspi_psram_dma (
   input  clk,
   input  rst_n,
+  input  init,
   input  [31:0] axil_addr,
   input  [31:0] axil_wdata,
   input  [3:0]  axil_wstrb,
@@ -21,8 +22,8 @@ module rv64_ai_qspi_psram_dma (
   assign psram_cs = psram_reg[0];
   assign dma_irq = dma_reg[0];
 
-  always @(posedge clk or negedge rst_n) begin
-    if (!rst_n) begin
+  always @(posedge clk or posedge init or negedge rst_n) begin
+    if (!rst_n || init) begin
       qspi_reg <= 32'b0;
       psram_reg <= 32'b0;
       dma_reg <= 32'b0;

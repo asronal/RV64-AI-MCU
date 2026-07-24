@@ -1,6 +1,7 @@
 module rv64_ai_uart (
   input  clk,
   input  rst_n,
+  input  init,
   input  [31:0] axil_addr,
   input  [31:0] axil_wdata,
   input  [3:0]  axil_wstrb,
@@ -18,8 +19,8 @@ module rv64_ai_uart (
 
   assign tx = tx_reg[0];
 
-  always @(posedge clk or negedge rst_n) begin
-    if (!rst_n) begin
+  always @(posedge clk or posedge init or negedge rst_n) begin
+    if (!rst_n || init) begin
       baud_reg <= 32'd115200;
       tx_reg   <= 32'b0;
       rx_reg   <= 32'b0;

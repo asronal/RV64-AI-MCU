@@ -1,6 +1,7 @@
 module rv64_ai_security_block (
   input  clk,
   input  rst_n,
+  input  init,
   input  [31:0] axil_addr,
   input  [31:0] axil_wdata,
   input  [3:0]  axil_wstrb,
@@ -21,8 +22,8 @@ module rv64_ai_security_block (
   assign otp_ready = otp_reg[0];
   assign trng_ready = trng_reg[0];
 
-  always @(posedge clk or negedge rst_n) begin
-    if (!rst_n) begin
+  always @(posedge clk or posedge init or negedge rst_n) begin
+    if (!rst_n || init) begin
       sec_reg <= 32'b0;
       otp_reg <= 32'b0;
       trng_reg <= 32'b0;

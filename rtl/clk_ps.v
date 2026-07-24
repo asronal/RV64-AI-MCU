@@ -1,6 +1,7 @@
 module rv64_ai_clock_sleep_wakeup (
   input  clk,
   input  rst_n,
+  input  init,
   input  [31:0] axil_addr,
   input  [31:0] axil_wdata,
   input  [3:0]  axil_wstrb,
@@ -19,7 +20,7 @@ module rv64_ai_clock_sleep_wakeup (
   assign deep_sleep = ctrl_reg[1];
   assign wake_irq = ctrl_reg[2];
 
-  always @(posedge clk or negedge rst_n) begin
+  always @(posedge clk or posedge init or negedge rst_n) begin
     if (!rst_n) ctrl_reg <= 32'b0;
     else if (axil_write) ctrl_reg <= axil_wdata;
   end

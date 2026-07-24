@@ -1,6 +1,7 @@
 module rv64_ai_perf_counters (
   input  clk,
   input  rst_n,
+  input  init,
   input  [31:0] axil_addr,
   input  [31:0] axil_wdata,
   input  [3:0]  axil_wstrb,
@@ -21,8 +22,8 @@ module rv64_ai_perf_counters (
   assign perf2 = perf2_reg;
   assign perf3 = perf3_reg;
 
-  always @(posedge clk or negedge rst_n) begin
-    if (!rst_n) begin
+  always @(posedge clk or posedge init or negedge rst_n) begin
+    if (!rst_n || init) begin
       perf0_reg <= 32'b0;
       perf1_reg <= 32'b0;
       perf2_reg <= 32'b0;

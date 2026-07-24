@@ -1,6 +1,7 @@
 module rv64_ai_pmp (
   input  clk,
   input  rst_n,
+  input  init,
   input  [31:0] axil_addr,
   input  [31:0] axil_wdata,
   input  [3:0]  axil_wstrb,
@@ -15,7 +16,7 @@ module rv64_ai_pmp (
 
   assign pmp_cfg = pmp_cfg_reg;
 
-  always @(posedge clk or negedge rst_n) begin
+  always @(posedge clk or posedge init or negedge rst_n) begin
     if (!rst_n) pmp_cfg_reg <= 32'b0;
     else if (axil_write) pmp_cfg_reg <= axil_wdata;
   end

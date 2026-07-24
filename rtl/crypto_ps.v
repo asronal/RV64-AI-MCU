@@ -1,6 +1,7 @@
 module rv64_ai_crypto_engine (
   input  clk,
   input  rst_n,
+  input  init,
   input  [31:0] axil_addr,
   input  [31:0] axil_wdata,
   input  [3:0]  axil_wstrb,
@@ -19,8 +20,8 @@ module rv64_ai_crypto_engine (
 
   assign crypto_status = {aes128_reg[0], aes256_reg[0], sha256_reg[0], sha512_reg[0], crc32_reg[0], 27'b0};
 
-  always @(posedge clk or negedge rst_n) begin
-    if (!rst_n) begin
+  always @(posedge clk or posedge init or negedge rst_n) begin
+    if (!rst_n || init) begin
       aes128_reg <= 32'b0;
       aes256_reg <= 32'b0;
       sha256_reg <= 32'b0;

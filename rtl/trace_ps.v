@@ -1,6 +1,7 @@
 module rv64_ai_trace_buffer (
   input  clk,
   input  rst_n,
+  input  init,
   input  [31:0] axil_addr,
   input  [31:0] axil_wdata,
   input  [3:0]  axil_wstrb,
@@ -13,7 +14,7 @@ module rv64_ai_trace_buffer (
 
   reg [31:0] trace_reg;
 
-  always @(posedge clk or negedge rst_n) begin
+  always @(posedge clk or posedge init or negedge rst_n) begin
     if (!rst_n) trace_reg <= 32'b0;
     else if (axil_write) trace_reg <= axil_wdata;
   end

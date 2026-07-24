@@ -44,7 +44,6 @@ module rv64_ai_soc_top (
   localparam [31:0] TPU_BASE  = 32'h0000_1200;
   localparam [31:0] TRACE_BASE = 32'h0000_1300;
   localparam [31:0] USB_BASE  = 32'h0000_1400;
-  localparam [31:0] XT_BASE   = 32'h0000_1500;
   localparam [31:0] DBG_BASE  = 32'h0000_1600;
   localparam [31:0] I2C2_BASE = 32'h0000_1700;
   localparam [31:0] SPI2_BASE = 32'h0000_1800;
@@ -93,12 +92,22 @@ module rv64_ai_soc_top (
   wire [63:0] perf_counter5;
   wire [63:0] perf_counter6;
   wire [63:0] perf_counter7;
-  wire sys_init;
+  reg sys_init;
 
   wire [63:0] mem_addr = (core_dmem_read || core_dmem_write) ? core_dmem_addr : core_imem_addr;
   wire [63:0] mem_wdata = core_dmem_wdata;
-  assign sys_init = ~rst_n;
   wire [7:0]  mem_wstrb = core_dmem_wstrb;
+  initial begin
+    sys_init = 1'b1;
+  end
+
+  always @(negedge rst_n or posedge clk) begin
+    if (!rst_n) begin
+      sys_init <= 1'b1;
+    end else begin
+      sys_init <= 1'b0;
+    end
+  end
   wire        mem_read  = core_dmem_read;
   wire        mem_write = core_dmem_write;
 
@@ -166,381 +175,412 @@ module rv64_ai_soc_top (
                          usb_rsel | dbg_rsel | i2c2_rsel | spi2_rsel | uart2_rsel;
   assign axil_addr     = (axil_awvalid && axil_wvalid) ? axil_awaddr : axil_araddr;
 
-  rv64_ai_gpio u_gpio (
-    .clk(clk), .rst_n(rst_n),
-    .axil_addr(axil_addr),
-    .axil_wdata(axil_wdata),
-    .axil_wstrb(axil_wstrb),
-    .axil_write(gpio_wsel),
-    .axil_read(gpio_rsel),
-    .axil_rdata(gpio_rdata),
-    .axil_valid(gpio_valid),
-    .gpio_io(gpio_io)
-  );
+  generate
+    if (1) begin : gen_peripherals
+      rv64_ai_gpio u_gpio (
+        .clk(clk), .rst_n(rst_n),
+        .init(sys_init),
+        .axil_addr(axil_addr),
+        .axil_wdata(axil_wdata),
+        .axil_wstrb(axil_wstrb),
+        .axil_write(gpio_wsel),
+        .axil_read(gpio_rsel),
+        .axil_rdata(gpio_rdata),
+        .axil_valid(gpio_valid),
+        .gpio_io(gpio_io)
+      );
 
-  rv64_ai_uart u_uart0 (
-    .clk(clk), .rst_n(rst_n),
-    .axil_addr(axil_addr),
-    .axil_wdata(axil_wdata),
-    .axil_wstrb(axil_wstrb),
-    .axil_write(uart_wsel),
-    .axil_read(uart_rsel),
-    .axil_rdata(uart_rdata),
-    .axil_valid(uart_valid),
-    .tx(),
-    .rx(1'b0)
-  );
+      rv64_ai_uart u_uart0 (
+        .clk(clk), .rst_n(rst_n),
+        .init(sys_init),
+        .axil_addr(axil_addr),
+        .axil_wdata(axil_wdata),
+        .axil_wstrb(axil_wstrb),
+        .axil_write(uart_wsel),
+        .axil_read(uart_rsel),
+        .axil_rdata(uart_rdata),
+        .axil_valid(uart_valid),
+        .tx(),
+        .rx(1'b0)
+      );
 
-  rv64_ai_spi u_spi0 (
-    .clk(clk), .rst_n(rst_n),
-    .axil_addr(axil_addr),
-    .axil_wdata(axil_wdata),
-    .axil_wstrb(axil_wstrb),
-    .axil_write(spi_wsel),
-    .axil_read(spi_rsel),
-    .axil_rdata(spi_rdata),
-    .axil_valid(spi_valid),
-    .sclk(),
-    .mosi(),
-    .miso(1'b0)
-  );
+      rv64_ai_spi u_spi0 (
+        .clk(clk), .rst_n(rst_n),
+        .init(sys_init),
+        .axil_addr(axil_addr),
+        .axil_wdata(axil_wdata),
+        .axil_wstrb(axil_wstrb),
+        .axil_write(spi_wsel),
+        .axil_read(spi_rsel),
+        .axil_rdata(spi_rdata),
+        .axil_valid(spi_valid),
+        .sclk(),
+        .mosi(),
+        .miso(1'b0)
+      );
 
-  rv64_ai_i2c u_i2c0 (
-    .clk(clk), .rst_n(rst_n),
-    .axil_addr(axil_addr),
-    .axil_wdata(axil_wdata),
-    .axil_wstrb(axil_wstrb),
-    .axil_write(i2c_wsel),
-    .axil_read(i2c_rsel),
-    .axil_rdata(i2c_rdata),
-    .axil_valid(i2c_valid),
-    .scl(),
-    .sda()
-  );
+      rv64_ai_i2c u_i2c0 (
+        .clk(clk), .rst_n(rst_n),
+        .init(sys_init),
+        .axil_addr(axil_addr),
+        .axil_wdata(axil_wdata),
+        .axil_wstrb(axil_wstrb),
+        .axil_write(i2c_wsel),
+        .axil_read(i2c_rsel),
+        .axil_rdata(i2c_rdata),
+        .axil_valid(i2c_valid),
+        .scl(),
+        .sda()
+      );
 
-  rv64_ai_pwm_timer_wdt_rtc u_pwmt (
-    .clk(clk), .rst_n(rst_n),
-    .axil_addr(axil_addr),
-    .axil_wdata(axil_wdata),
-    .axil_wstrb(axil_wstrb),
-    .axil_write(pwm_wsel),
-    .axil_read(pwm_rsel),
-    .axil_rdata(pwm_rdata),
-    .axil_valid(pwm_valid),
-    .pwm_out(),
-    .irq()
-  );
+      rv64_ai_pwm_timer_wdt_rtc u_pwmt (
+        .clk(clk), .rst_n(rst_n),
+        .init(sys_init),
+        .axil_addr(axil_addr),
+        .axil_wdata(axil_wdata),
+        .axil_wstrb(axil_wstrb),
+        .axil_write(pwm_wsel),
+        .axil_read(pwm_rsel),
+        .axil_rdata(pwm_rdata),
+        .axil_valid(pwm_valid),
+        .pwm_out(),
+        .irq()
+      );
 
-  rv64_ai_adc_usb_can u_adc (
-    .clk(clk), .rst_n(rst_n),
-    .axil_addr(axil_addr),
-    .axil_wdata(axil_wdata),
-    .axil_wstrb(axil_wstrb),
-    .axil_write(adc_wsel),
-    .axil_read(adc_rsel),
-    .axil_rdata(adc_rdata),
-    .axil_valid(adc_valid),
-    .adc_in(12'b0),
-    .usb_tx(),
-    .usb_rx(1'b0),
-    .can_tx(),
-    .can_rx(1'b0)
-  );
+      rv64_ai_adc_usb_can u_adc (
+        .clk(clk), .rst_n(rst_n),
+        .init(sys_init),
+        .axil_addr(axil_addr),
+        .axil_wdata(axil_wdata),
+        .axil_wstrb(axil_wstrb),
+        .axil_write(adc_wsel),
+        .axil_read(adc_rsel),
+        .axil_rdata(adc_rdata),
+        .axil_valid(adc_valid),
+        .adc_in(12'b0),
+        .usb_tx(),
+        .usb_rx(1'b0),
+        .can_tx(),
+        .can_rx(1'b0)
+      );
 
-  rv64_ai_plic_clint_debug u_plic (
-    .clk(clk), .rst_n(rst_n),
-    .axil_addr(axil_addr),
-    .axil_wdata(axil_wdata),
-    .axil_wstrb(axil_wstrb),
-    .axil_write(plic_wsel),
-    .axil_read(plic_rsel),
-    .axil_rdata(plic_rdata),
-    .axil_valid(plic_valid),
-    .irq(),
-    .debug_halt()
-  );
+      rv64_ai_plic_clint_debug u_plic (
+        .clk(clk), .rst_n(rst_n),
+        .init(sys_init),
+        .axil_addr(axil_addr),
+        .axil_wdata(axil_wdata),
+        .axil_wstrb(axil_wstrb),
+        .axil_write(plic_wsel),
+        .axil_read(plic_rsel),
+        .axil_rdata(plic_rdata),
+        .axil_valid(plic_valid),
+        .irq(),
+        .debug_halt()
+      );
 
-  rv64_ai_qspi_psram_dma u_qspi (
-    .clk(clk), .rst_n(rst_n),
-    .axil_addr(axil_addr),
-    .axil_wdata(axil_wdata),
-    .axil_wstrb(axil_wstrb),
-    .axil_write(qspi_wsel),
-    .axil_read(qspi_rsel),
-    .axil_rdata(qspi_rdata),
-    .axil_valid(qspi_valid),
-    .qspi_cs(),
-    .psram_cs(),
-    .dma_irq()
-  );
+      rv64_ai_qspi_psram_dma u_qspi (
+        .clk(clk), .rst_n(rst_n),
+        .init(sys_init),
+        .axil_addr(axil_addr),
+        .axil_wdata(axil_wdata),
+        .axil_wstrb(axil_wstrb),
+        .axil_write(qspi_wsel),
+        .axil_read(qspi_rsel),
+        .axil_rdata(qspi_rdata),
+        .axil_valid(qspi_valid),
+        .qspi_cs(),
+        .psram_cs(),
+        .dma_irq()
+      );
 
-  rv64_ai_security_block u_sec (
-    .clk(clk), .rst_n(rst_n),
-    .axil_addr(axil_addr),
-    .axil_wdata(axil_wdata),
-    .axil_wstrb(axil_wstrb),
-    .axil_write(sec_wsel),
-    .axil_read(sec_rsel),
-    .axil_rdata(sec_rdata),
-    .axil_valid(sec_valid),
-    .secure_boot_ok(),
-    .otp_ready(),
-    .trng_ready()
-  );
+      rv64_ai_security_block u_sec (
+        .clk(clk), .rst_n(rst_n),
+        .init(sys_init),
+        .axil_addr(axil_addr),
+        .axil_wdata(axil_wdata),
+        .axil_wstrb(axil_wstrb),
+        .axil_write(sec_wsel),
+        .axil_read(sec_rsel),
+        .axil_rdata(sec_rdata),
+        .axil_valid(sec_valid),
+        .secure_boot_ok(),
+        .otp_ready(),
+        .trng_ready()
+      );
 
-  rv64_ai_breakpoint_unit u_brk (
-    .clk(clk), .rst_n(rst_n),
-    .axil_addr(axil_addr),
-    .axil_wdata(axil_wdata),
-    .axil_wstrb(axil_wstrb),
-    .axil_write(brk_wsel),
-    .axil_read(brk_rsel),
-    .axil_rdata(brk_rdata),
-    .axil_valid(brk_valid),
-    .hw_breakpoint(),
-    .watchpoint()
-  );
+      rv64_ai_breakpoint_unit u_brk (
+        .clk(clk), .rst_n(rst_n),
+        .init(sys_init),
+        .axil_addr(axil_addr),
+        .axil_wdata(axil_wdata),
+        .axil_wstrb(axil_wstrb),
+        .axil_write(brk_wsel),
+        .axil_read(brk_rsel),
+        .axil_rdata(brk_rdata),
+        .axil_valid(brk_valid),
+        .hw_breakpoint(),
+        .watchpoint()
+      );
 
-  rv64_ai_can_fd u_can (
-    .clk(clk), .rst_n(rst_n),
-    .axil_addr(axil_addr),
-    .axil_wdata(axil_wdata),
-    .axil_wstrb(axil_wstrb),
-    .axil_write(can_wsel),
-    .axil_read(can_rsel),
-    .axil_rdata(can_rdata),
-    .axil_valid(can_valid),
-    .can_tx(),
-    .can_rx(1'b0)
-  );
+      rv64_ai_can_fd u_can (
+        .clk(clk), .rst_n(rst_n),
+        .init(sys_init),
+        .axil_addr(axil_addr),
+        .axil_wdata(axil_wdata),
+        .axil_wstrb(axil_wstrb),
+        .axil_write(can_wsel),
+        .axil_read(can_rsel),
+        .axil_rdata(can_rdata),
+        .axil_valid(can_valid),
+        .can_tx(),
+        .can_rx(1'b0)
+      );
 
-  rv64_ai_clock_sleep_wakeup u_clk (
-    .clk(clk), .rst_n(rst_n),
-    .axil_addr(axil_addr),
-    .axil_wdata(axil_wdata),
-    .axil_wstrb(axil_wstrb),
-    .axil_write(clk_wsel),
-    .axil_read(clk_rsel),
-    .axil_rdata(clk_rdata),
-    .axil_valid(clk_valid),
-    .sleep_mode(),
-    .deep_sleep(),
-    .wake_irq()
-  );
+      rv64_ai_clock_sleep_wakeup u_clk (
+        .clk(clk), .rst_n(rst_n),
+        .init(sys_init),
+        .axil_addr(axil_addr),
+        .axil_wdata(axil_wdata),
+        .axil_wstrb(axil_wstrb),
+        .axil_write(clk_wsel),
+        .axil_read(clk_rsel),
+        .axil_rdata(clk_rdata),
+        .axil_valid(clk_valid),
+        .sleep_mode(),
+        .deep_sleep(),
+        .wake_irq()
+      );
 
-  rv64_ai_crypto_engine u_crypto (
-    .clk(clk), .rst_n(rst_n),
-    .axil_addr(axil_addr),
-    .axil_wdata(axil_wdata),
-    .axil_wstrb(axil_wstrb),
-    .axil_write(crypto_wsel),
-    .axil_read(crypto_rsel),
-    .axil_rdata(crypto_rdata),
-    .axil_valid(crypto_valid),
-    .crypto_status()
-  );
+      rv64_ai_crypto_engine u_crypto (
+        .clk(clk), .rst_n(rst_n),
+        .init(sys_init),
+        .axil_addr(axil_addr),
+        .axil_wdata(axil_wdata),
+        .axil_wstrb(axil_wstrb),
+        .axil_write(crypto_wsel),
+        .axil_read(crypto_rsel),
+        .axil_rdata(crypto_rdata),
+        .axil_valid(crypto_valid),
+        .crypto_status()
+      );
 
-  rv64_ai_dma_sg u_dma (
-    .clk(clk), .rst_n(rst_n),
-    .axil_addr(axil_addr),
-    .axil_wdata(axil_wdata),
-    .axil_wstrb(axil_wstrb),
-    .axil_write(dma_wsel),
-    .axil_read(dma_rsel),
-    .axil_rdata(dma_rdata),
-    .axil_valid(dma_valid),
-    .dma_irq()
-  );
+      rv64_ai_dma_sg u_dma (
+        .clk(clk), .rst_n(rst_n),
+        .init(sys_init),
+        .axil_addr(axil_addr),
+        .axil_wdata(axil_wdata),
+        .axil_wstrb(axil_wstrb),
+        .axil_write(dma_wsel),
+        .axil_read(dma_rsel),
+        .axil_rdata(dma_rdata),
+        .axil_valid(dma_valid),
+        .dma_irq()
+      );
 
-  rv64_ai_dsp_top u_dsp (
-    .clk(clk), .rst_n(rst_n),
-    .axil_addr(axil_addr),
-    .axil_wdata(axil_wdata),
-    .axil_wstrb(axil_wstrb),
-    .axil_write(dsp_wsel),
-    .axil_read(dsp_rsel),
-    .axil_rdata(dsp_rdata),
-    .axil_valid(dsp_valid)
-  );
+      rv64_ai_dsp_top u_dsp (
+        .clk(clk), .rst_n(rst_n),
+        .axil_addr(axil_addr),
+        .axil_wdata(axil_wdata),
+        .axil_wstrb(axil_wstrb),
+        .axil_write(dsp_wsel),
+        .axil_read(dsp_rsel),
+        .axil_rdata(dsp_rdata),
+        .axil_valid(dsp_valid)
+      );
 
-  rv64_ai_jtag_debug u_jtag (
-    .clk(clk), .rst_n(rst_n),
-    .axil_addr(axil_addr),
-    .axil_wdata(axil_wdata),
-    .axil_wstrb(axil_wstrb),
-    .axil_write(jtag_wsel),
-    .axil_read(jtag_rsel),
-    .axil_rdata(jtag_rdata),
-    .axil_valid(jtag_valid),
-    .jtag_tms(),
-    .jtag_tdi(),
-    .jtag_tck(),
-    .jtag_tdo(1'b0)
-  );
+      rv64_ai_jtag_debug u_jtag (
+        .clk(clk), .rst_n(rst_n),
+        .init(sys_init),
+        .axil_addr(axil_addr),
+        .axil_wdata(axil_wdata),
+        .axil_wstrb(axil_wstrb),
+        .axil_write(jtag_wsel),
+        .axil_read(jtag_rsel),
+        .axil_rdata(jtag_rdata),
+        .axil_valid(jtag_valid),
+        .jtag_tms(),
+        .jtag_tdi(),
+        .jtag_tck(),
+        .jtag_tdo(1'b0)
+      );
 
-  rv64_ai_perf_counters u_perf (
-    .clk(clk), .rst_n(rst_n),
-    .axil_addr(axil_addr),
-    .axil_wdata(axil_wdata),
-    .axil_wstrb(axil_wstrb),
-    .axil_write(perf_wsel),
-    .axil_read(perf_rsel),
-    .axil_rdata(perf_rdata),
-    .axil_valid(perf_valid),
-    .perf0(),
-    .perf1(),
-    .perf2(),
-    .perf3()
-  );
+      rv64_ai_perf_counters u_perf (
+        .clk(clk), .rst_n(rst_n),
+        .init(sys_init),
+        .axil_addr(axil_addr),
+        .axil_wdata(axil_wdata),
+        .axil_wstrb(axil_wstrb),
+        .axil_write(perf_wsel),
+        .axil_read(perf_rsel),
+        .axil_rdata(perf_rdata),
+        .axil_valid(perf_valid),
+        .perf0(),
+        .perf1(),
+        .perf2(),
+        .perf3()
+      );
 
-  rv64_ai_pmp u_pmp (
-    .clk(clk), .rst_n(rst_n),
-    .axil_addr(axil_addr),
-    .axil_wdata(axil_wdata),
-    .axil_wstrb(axil_wstrb),
-    .axil_write(pmp_wsel),
-    .axil_read(pmp_rsel),
-    .axil_rdata(pmp_rdata),
-    .axil_valid(pmp_valid),
-    .pmp_cfg()
-  );
+      rv64_ai_pmp u_pmp (
+        .clk(clk), .rst_n(rst_n),
+        .init(sys_init),
+        .axil_addr(axil_addr),
+        .axil_wdata(axil_wdata),
+        .axil_wstrb(axil_wstrb),
+        .axil_write(pmp_wsel),
+        .axil_read(pmp_rsel),
+        .axil_rdata(pmp_rdata),
+        .axil_valid(pmp_valid),
+        .pmp_cfg()
+      );
 
-  rv64_ai_tpu_top u_tpu (
-    .clk(clk), .rst_n(rst_n),
-    .axil_addr(axil_addr),
-    .axil_wdata(axil_wdata),
-    .axil_wstrb(axil_wstrb),
-    .axil_write(tpu_wsel),
-    .axil_read(tpu_rsel),
-    .axil_rdata(tpu_rdata),
-    .axil_valid(tpu_valid)
-  );
+      rv64_ai_tpu_top u_tpu (
+        .clk(clk), .rst_n(rst_n),
+        .axil_addr(axil_addr),
+        .axil_wdata(axil_wdata),
+        .axil_wstrb(axil_wstrb),
+        .axil_write(tpu_wsel),
+        .axil_read(tpu_rsel),
+        .axil_rdata(tpu_rdata),
+        .axil_valid(tpu_valid)
+      );
 
-  rv64_ai_trace_buffer u_trace (
-    .clk(clk), .rst_n(rst_n),
-    .axil_addr(axil_addr),
-    .axil_wdata(axil_wdata),
-    .axil_wstrb(axil_wstrb),
-    .axil_write(trace_wsel),
-    .axil_read(trace_rsel),
-    .axil_rdata(trace_rdata),
-    .axil_valid(trace_valid),
-    .trace_word()
-  );
+      rv64_ai_trace_buffer u_trace (
+        .clk(clk), .rst_n(rst_n),
+        .init(sys_init),
+        .axil_addr(axil_addr),
+        .axil_wdata(axil_wdata),
+        .axil_wstrb(axil_wstrb),
+        .axil_write(trace_wsel),
+        .axil_read(trace_rsel),
+        .axil_rdata(trace_rdata),
+        .axil_valid(trace_valid),
+        .trace_word()
+      );
 
-  rv64_ai_usb_fs u_usb (
-    .clk(clk), .rst_n(rst_n),
-    .axil_addr(axil_addr),
-    .axil_wdata(axil_wdata),
-    .axil_wstrb(axil_wstrb),
-    .axil_write(usb_wsel),
-    .axil_read(usb_rsel),
-    .axil_rdata(usb_rdata),
-    .axil_valid(usb_valid),
-    .usb_tx(),
-    .usb_rx(1'b0)
-  );
+      rv64_ai_usb_fs u_usb (
+        .clk(clk), .rst_n(rst_n),
+        .init(sys_init),
+        .axil_addr(axil_addr),
+        .axil_wdata(axil_wdata),
+        .axil_wstrb(axil_wstrb),
+        .axil_write(usb_wsel),
+        .axil_read(usb_rsel),
+        .axil_rdata(usb_rdata),
+        .axil_valid(usb_valid),
+        .usb_tx(),
+        .usb_rx(1'b0)
+      );
 
-  rv64_ai_xtensor_extension u_xt (
-    .clk(clk),
-    .rst_n(rst_n),
-    .init(sys_init),
-    .instr(32'b0),
-    .rs1(64'b0),
-    .rs2(64'b0),
-    .rd(xt_rd),
-    .valid(xt_valid)
-  );
+      rv64_ai_xtensor_extension u_xt (
+        .clk(clk),
+        .rst_n(rst_n),
+        .init(sys_init),
+        .instr(32'b0),
+        .rs1(64'b0),
+        .rs2(64'b0),
+        .rd(xt_rd),
+        .valid(xt_valid)
+      );
 
-  rv64_ai_debug_module u_dbg (
-    .clk(clk), .rst_n(rst_n),
-    .axil_addr(axil_addr),
-    .axil_wdata(axil_wdata),
-    .axil_wstrb(axil_wstrb),
-    .axil_write(dbg_wsel),
-    .axil_read(dbg_rsel),
-    .axil_rdata(dbg_rdata),
-    .axil_valid(dbg_valid),
-    .debug_halt(),
-    .trace_buf()
-  );
+      rv64_ai_debug_module u_dbg (
+        .clk(clk), .rst_n(rst_n),
+        .init(sys_init),
+        .axil_addr(axil_addr),
+        .axil_wdata(axil_wdata),
+        .axil_wstrb(axil_wstrb),
+        .axil_write(dbg_wsel),
+        .axil_read(dbg_rsel),
+        .axil_rdata(dbg_rdata),
+        .axil_valid(dbg_valid),
+        .debug_halt(),
+        .trace_buf()
+      );
 
-  rv64_ai_i2c2 u_i2c2 (
-    .clk(clk), .rst_n(rst_n),
-    .axil_addr(axil_addr),
-    .axil_wdata(axil_wdata),
-    .axil_wstrb(axil_wstrb),
-    .axil_write(i2c2_wsel),
-    .axil_read(i2c2_rsel),
-    .axil_rdata(i2c2_rdata),
-    .axil_valid(i2c2_valid),
-    .scl(),
-    .sda()
-  );
+      rv64_ai_i2c2 u_i2c2 (
+        .clk(clk), .rst_n(rst_n),
+        .init(sys_init),
+        .axil_addr(axil_addr),
+        .axil_wdata(axil_wdata),
+        .axil_wstrb(axil_wstrb),
+        .axil_write(i2c2_wsel),
+        .axil_read(i2c2_rsel),
+        .axil_rdata(i2c2_rdata),
+        .axil_valid(i2c2_valid),
+        .scl(),
+        .sda()
+      );
 
-  rv64_ai_spi2 u_spi2 (
-    .clk(clk), .rst_n(rst_n),
-    .axil_addr(axil_addr),
-    .axil_wdata(axil_wdata),
-    .axil_wstrb(axil_wstrb),
-    .axil_write(spi2_wsel),
-    .axil_read(spi2_rsel),
-    .axil_rdata(spi2_rdata),
-    .axil_valid(spi2_valid),
-    .sclk(),
-    .mosi(),
-    .miso(1'b0)
-  );
+      rv64_ai_spi2 u_spi2 (
+        .clk(clk), .rst_n(rst_n),
+        .init(sys_init),
+        .axil_addr(axil_addr),
+        .axil_wdata(axil_wdata),
+        .axil_wstrb(axil_wstrb),
+        .axil_write(spi2_wsel),
+        .axil_read(spi2_rsel),
+        .axil_rdata(spi2_rdata),
+        .axil_valid(spi2_valid),
+        .sclk(),
+        .mosi(),
+        .miso(1'b0)
+      );
 
-  rv64_ai_uart2 u_uart2 (
-    .clk(clk), .rst_n(rst_n),
-    .axil_addr(axil_addr),
-    .axil_wdata(axil_wdata),
-    .axil_wstrb(axil_wstrb),
-    .axil_write(uart2_wsel),
-    .axil_read(uart2_rsel),
-    .axil_rdata(uart2_rdata),
-    .axil_valid(uart2_valid),
-    .tx(),
-    .rx(1'b0)
-  );
+      rv64_ai_uart2 u_uart2 (
+        .clk(clk), .rst_n(rst_n),
+        .init(sys_init),
+        .axil_addr(axil_addr),
+        .axil_wdata(axil_wdata),
+        .axil_wstrb(axil_wstrb),
+        .axil_write(uart2_wsel),
+        .axil_read(uart2_rsel),
+        .axil_rdata(uart2_rdata),
+        .axil_valid(uart2_valid),
+        .tx(),
+        .rx(1'b0)
+      );
+    end
+  endgenerate
 
-  rv64_ai_core u_core (
-    .clk(clk),
-    .rst_n(rst_n),
-    .init(sys_init),
-    .imem_rdata(mem_rdata),
-    .imem_valid(mem_valid),
-    .dmem_rdata(mem_rdata),
-    .dmem_valid(mem_valid),
-    .imem_addr(core_imem_addr),
-    .dmem_addr(core_dmem_addr),
-    .dmem_wdata(core_dmem_wdata),
-    .dmem_wstrb(core_dmem_wstrb),
-    .dmem_read(core_dmem_read),
-    .dmem_write(core_dmem_write),
-    .perf_counter0(perf_counter0),
-    .perf_counter1(perf_counter1),
-    .perf_counter2(perf_counter2),
-    .perf_counter3(perf_counter3),
-    .perf_counter4(perf_counter4),
-    .perf_counter5(perf_counter5),
-    .perf_counter6(perf_counter6),
-    .perf_counter7(perf_counter7)
-  );
+  generate
+    if (1) begin : gen_core_mem
+      rv64_ai_core u_core (
+        .clk(clk),
+        .rst_n(rst_n),
+        .init(sys_init),
+        .imem_rdata(mem_rdata),
+        .imem_valid(mem_valid),
+        .dmem_rdata(mem_rdata),
+        .dmem_valid(mem_valid),
+        .imem_addr(core_imem_addr),
+        .dmem_addr(core_dmem_addr),
+        .dmem_wdata(core_dmem_wdata),
+        .dmem_wstrb(core_dmem_wstrb),
+        .dmem_read(core_dmem_read),
+        .dmem_write(core_dmem_write),
+        .perf_counter0(perf_counter0),
+        .perf_counter1(perf_counter1),
+        .perf_counter2(perf_counter2),
+        .perf_counter3(perf_counter3),
+        .perf_counter4(perf_counter4),
+        .perf_counter5(perf_counter5),
+        .perf_counter6(perf_counter6),
+        .perf_counter7(perf_counter7)
+      );
 
-  rv64_ai_memory_subsystem u_mem (
-    .clk(clk),
-    .rst_n(rst_n),
-    .init(sys_init),
-    .addr(mem_addr),
-    .wdata(mem_wdata),
-    .wstrb(mem_wstrb),
-    .read(mem_read),
-    .write(mem_write),
-    .rdata(mem_rdata),
-    .valid(mem_valid)
-  );
+      rv64_ai_memory_subsystem u_mem (
+        .clk(clk),
+        .rst_n(rst_n),
+        .init(sys_init),
+        .addr(mem_addr),
+        .wdata(mem_wdata),
+        .wstrb(mem_wstrb),
+        .read(mem_read),
+        .write(mem_write),
+        .rdata(mem_rdata),
+        .valid(mem_valid)
+      );
+    end
+  endgenerate
 
   assign axil_awready = 1'b1;
   assign axil_wready  = 1'b1;

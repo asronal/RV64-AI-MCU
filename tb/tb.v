@@ -170,31 +170,31 @@ module tb;
     reset_seen = 0;
 
     #1;
-    if (u_dut.u_core.init === 1'b1 || u_dut.u_mem.init === 1'b1) begin
+    if (u_dut.gen_core_mem.u_core.init === 1'b1 || u_dut.gen_core_mem.u_mem.init === 1'b1) begin
       init_seen = 1;
       $display("[TB] init signal observed at core/memory boundary");
     end
-    if (u_dut.u_core.rst_n === 1'b0 || u_dut.u_mem.rst_n === 1'b0) begin
+    if (u_dut.gen_core_mem.u_core.rst_n === 1'b0 || u_dut.gen_core_mem.u_mem.rst_n === 1'b0) begin
       reset_seen = 1;
       $display("[TB] reset signal observed at core/memory boundary");
     end
 
-    $display("[DBG] mem boot_rom[0]=0x%h internal_sram[0]=0x%h tensor_sram[0]=0x%h otp[0]=0x%h icache[0]=0x%h dcache[0]=0x%h", u_dut.u_mem.boot_rom[0], u_dut.u_mem.internal_sram[0], u_dut.u_mem.tensor_sram[0], u_dut.u_mem.otp[0], u_dut.u_mem.icache[0], u_dut.u_mem.dcache[0]);
-    $display("[DBG] core pc_if=0x%h gpr[0]=0x%h perf_counter[0]=0x%h", u_dut.u_core.pc_if, u_dut.u_core.gpr[0], u_dut.u_core.perf_counter[0]);
-    $display("[DBG] gpio dir_reg=0x%h", u_dut.u_gpio.dir_reg);
-    $display("[DBG] xt rd=0x%h", u_dut.u_xt.rd);
+    $display("[DBG] mem boot_rom[0]=0x%h internal_sram[0]=0x%h tensor_sram[0]=0x%h otp[0]=0x%h icache[0]=0x%h dcache[0]=0x%h", u_dut.gen_core_mem.u_mem.u_boot_rom.mem[0], u_dut.gen_core_mem.u_mem.u_internal_sram.mem[0], u_dut.gen_core_mem.u_mem.u_tensor_sram.mem[0], u_dut.gen_core_mem.u_mem.u_otp.mem[0], u_dut.gen_core_mem.u_mem.u_icache.mem[0], u_dut.gen_core_mem.u_mem.u_dcache.mem[0]);
+    $display("[DBG] core pc_if=0x%h gpr[0]=0x%h perf_counter[0]=0x%h", u_dut.gen_core_mem.u_core.pc_if, u_dut.gen_core_mem.u_core.gpr[0], u_dut.gen_core_mem.u_core.perf_counter[0]);
+    $display("[DBG] gpio dir_reg=0x%h", u_dut.gen_peripherals.u_gpio.dir_reg);
+    $display("[DBG] xt rd=0x%h", u_dut.gen_peripherals.u_xt.rd);
 
-    if (u_dut.u_mem.boot_rom[0] === 64'h0 &&
-        u_dut.u_mem.internal_sram[0] === 64'h0 &&
-        u_dut.u_mem.tensor_sram[0] === 64'h0 &&
-        u_dut.u_mem.otp[0] === 64'h0 &&
-        u_dut.u_mem.icache[0] === 64'h0 &&
-        u_dut.u_mem.dcache[0] === 64'h0 &&
-        u_dut.u_core.pc_if === 64'h0 &&
-        u_dut.u_core.gpr[0] === 64'h0 &&
-        u_dut.u_core.perf_counter[0] === 64'h0 &&
-        u_dut.u_gpio.dir_reg === 32'h0 &&
-        u_dut.u_xt.rd === 64'h0) begin
+    if (u_dut.gen_core_mem.u_mem.u_boot_rom.mem[0] === 64'h0 &&
+        u_dut.gen_core_mem.u_mem.u_internal_sram.mem[0] === 64'h0 &&
+        u_dut.gen_core_mem.u_mem.u_tensor_sram.mem[0] === 64'h0 &&
+        u_dut.gen_core_mem.u_mem.u_otp.mem[0] === 64'h0 &&
+        u_dut.gen_core_mem.u_mem.u_icache.mem[0] === 64'h0 &&
+        u_dut.gen_core_mem.u_mem.u_dcache.mem[0] === 64'h0 &&
+        u_dut.gen_core_mem.u_core.pc_if === 64'h0 &&
+        u_dut.gen_core_mem.u_core.gpr[0] === 64'h0 &&
+        u_dut.gen_core_mem.u_core.perf_counter[0] === 64'h0 &&
+        u_dut.gen_peripherals.u_gpio.dir_reg === 32'h0 &&
+        u_dut.gen_peripherals.u_xt.rd === 64'h0) begin
       $display("[PASS] core and memory state initialized by reset");
       test_passed = test_passed + 1;
     end else begin

@@ -27,19 +27,18 @@ module rv64_ai_perf_counters (
       perf1_reg <= 32'b0;
       perf2_reg <= 32'b0;
       perf3_reg <= 32'b0;
+    end else if (axil_write) begin
+      case (axil_addr[7:0])
+        8'h00: perf0_reg <= axil_wdata;
+        8'h04: perf1_reg <= axil_wdata;
+        8'h08: perf2_reg <= axil_wdata;
+        8'h0C: perf3_reg <= axil_wdata;
+      endcase
     end else begin
       perf0_reg <= perf0_reg + 1;
       perf1_reg <= perf1_reg + 1;
-      perf2_reg <= perf2_reg + 1;
-      perf3_reg <= perf3_reg + 1;
-      if (axil_write) begin
-        case (axil_addr[7:0])
-          8'h00: perf0_reg <= axil_wdata;
-          8'h04: perf1_reg <= axil_wdata;
-          8'h08: perf2_reg <= axil_wdata;
-          8'h0C: perf3_reg <= axil_wdata;
-        endcase
-      end
+      perf2_reg <= perf2_reg + 2;
+      perf3_reg <= perf3_reg + 3;
     end
   end
 

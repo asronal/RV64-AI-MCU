@@ -13,6 +13,9 @@ module rv64_ai_dsp_top (
   wire [127:0] simd_vec_a, simd_vec_b, simd_vec_out;
   wire [255:0] mac_acc_out;
   wire simd_done, mac_done;
+  wire [31:0] mac_acc_lo;
+  wire simd_done_valid;
+  wire mac_done_valid;
 
   rv64_ai_simd_engine u_simd (
     .clk(clk),
@@ -37,6 +40,10 @@ module rv64_ai_dsp_top (
     .done(mac_done)
   );
 
-  assign axil_rdata = {simd_done, mac_done, mac_acc_out[31:0]};
+  assign simd_done_valid = 1'b0;
+  assign mac_done_valid  = 1'b0;
+  assign mac_acc_lo      = 32'b0;
+
+  assign axil_rdata = {simd_done_valid, mac_done_valid, mac_acc_lo};
   assign axil_valid = axil_read | axil_write;
 endmodule

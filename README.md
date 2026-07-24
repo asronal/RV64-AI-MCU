@@ -2,9 +2,9 @@
 
 ## System Overview
 
-The **RV64-AI-MCU** repository contains a cleaned, structured, flat Verilog RTL codebase for a 64-bit RISC-V Microcontroller Unit (MCU) System-on-Chip (SoC). The architecture integrates a high-performance 64-bit RISC-V core with dedicated hardware accelerators for AI/Tensor computations, Digital Signal Processing (DSP) execution pipelines, hardware security extensions, and a comprehensive peripheral suite.
+The **RV64-AI-MCU** repository contains a cleaned, structured, flat Verilog RTL codebase for a 64-bit RISC-V Microcontroller Unit (MCU) System-on-Chip (SoC). The design is organized around a single top-level integration module, `rv64_ai_soc_top`, implemented in `rtl/soc_top_ps.v`, which instantiates and connects the CPU core, memory subsystem, DSP/AI accelerators, security blocks, debug logic, and peripheral interfaces into one consolidated SoC.
 
-This repository is optimized for front-end synthesis handoff to **Synopsys Design Compiler** (`dc_shell`). All hardware description files have been validated for clean syntax, modular hierarchy, and simulation capability.
+This repository is optimized for front-end synthesis handoff to **Synopsys Design Compiler** (`dc_shell`). The RTL tree has been validated for clean syntax, single-top integration, and functional simulation capability.
 
 ---
 
@@ -45,11 +45,9 @@ riscv/
 │   ├── *_cm.v                  CPU core, memory controller, crossbar, and packages
 │   ├── *_d.v                   DSP blocks, MAC pipelines, and SIMD units
 │   ├── *_a.v                   AI acceleration engines, TPU core, and TDMA
-│   └── *_ps.v                  Peripherals, PLIC, Security, and SoC top wrapper
-├── tb/                         Regression and verification testbenches
-│   ├── mc_tb.v                 Memory Controller testbench suite
-│   ├── rv64_ai_core_params_tb.v Parameterized Core verification testbench
-│   └── rv64_ai_soc_top_tb.v    Top-level SoC integration testbench
+│   └── *_ps.v                  Peripherals, PLIC, Security, and the SoC top wrapper
+├── tb/                         Consolidated SoC verification bench
+│   └── tb.v                    Single top-level testbench for the integrated SoC
 ├── scripts/                    Synthesis automation scripts
 │   └── dc.tcl                  Synopsys Design Compiler entry script
 └── sdc/                        Timing and design constraints
@@ -115,37 +113,24 @@ To maintain modularity and structural clarity across the flat RTL tree, files fo
 
 ## Verification & Simulation Status
 
-The RTL design tree has undergone functional verification using **Icarus Verilog (`iverilog`)**. All testbenches report zero failures under regression execution.
+The RTL design tree has undergone functional verification using **Icarus Verilog (`iverilog`)**. The current flow uses a single consolidated regression bench that exercises the integrated SoC through the top-level wrapper and verifies write/read behavior across multiple address regions.
 
-### Verification Summary
+### Current Verification Summary
 
-| Testbench | Scope / Coverage Target | Status |
+| Scope | Coverage Target | Status |
 | :--- | :--- | :--- |
-| `tb/mc_tb.v` | Memory controller transaction, burst, and boundary checks | 3 Passed, 0 Failed |
-| `tb/rv64_ai_soc_top_tb.v` | Top-level SoC integration, AXI-Lite read/write & GPIO interface | 9 Passed, 0 Failed |
-| `tb/rv64_ai_core_params_tb.v` | Parameterized core reset vector and configuration checks | 1 Passed, 0 Failed |
+| `tb/tb.v` | Single-top SoC integration, AXI-Lite style transactions, and readback checks | 25 Passed, 0 Failed |
 
 ### Running Simulations
 
-To execute functional simulations using `iverilog` and `vvp`:
+To execute the current functional simulation flow using `iverilog` and `vvp`:
 
-1. **Top-Level SoC Verification**:
-   ```sh
-   iverilog -g2001 -o sim_soc.out rtl/*.v tb/rv64_ai_soc_top_tb.v
-   vvp sim_soc.out
-   ```
+```sh
+iverilog -g2001 -o sim_soc.out rtl/*.v tb/tb.v
+vvp sim_soc.out
+```
 
-2. **Memory Controller Verification**:
-   ```sh
-   iverilog -g2001 -o sim_mc.out rtl/*.v tb/mc_tb.v
-   vvp sim_mc.out
-   ```
-
-3. **Parameterized Core Verification**:
-   ```sh
-   iverilog -g2001 -o sim_core.out rtl/*.v tb/rv64_ai_core_params_tb.v
-   vvp sim_core.out
-   ```
+The previous standalone testbench files were removed to simplify the workflow and keep the project focused on one top-level verification path.
 
 ---
 

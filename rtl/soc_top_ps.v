@@ -45,29 +45,33 @@ module rv64_ai_soc_top (
   localparam [31:0] TRACE_BASE = 32'h0000_1300;
   localparam [31:0] USB_BASE  = 32'h0000_1400;
   localparam [31:0] XT_BASE   = 32'h0000_1500;
+  localparam [31:0] DBG_BASE  = 32'h0000_1600;
+  localparam [31:0] I2C2_BASE = 32'h0000_1700;
+  localparam [31:0] SPI2_BASE = 32'h0000_1800;
+  localparam [31:0] UART2_BASE = 32'h0000_1900;
 
   wire [31:0] gpio_rdata, uart_rdata, spi_rdata, i2c_rdata, pwm_rdata;
   wire [31:0] adc_rdata, plic_rdata, qspi_rdata, sec_rdata;
   wire [31:0] brk_rdata, can_rdata, clk_rdata, crypto_rdata, dma_rdata;
   wire [31:0] dsp_rdata, jtag_rdata, perf_rdata, pmp_rdata, tpu_rdata;
-  wire [31:0] trace_rdata, usb_rdata;
+  wire [31:0] trace_rdata, usb_rdata, dbg_rdata, i2c2_rdata, spi2_rdata, uart2_rdata;
   wire gpio_valid, uart_valid, spi_valid, i2c_valid, pwm_valid;
   wire adc_valid, plic_valid, qspi_valid, sec_valid;
   wire brk_valid, can_valid, clk_valid, crypto_valid, dma_valid;
   wire dsp_valid, jtag_valid, perf_valid, pmp_valid, tpu_valid;
-  wire trace_valid, usb_valid;
+  wire trace_valid, usb_valid, dbg_valid, i2c2_valid, spi2_valid, uart2_valid;
   wire [31:0] axil_addr;
 
   wire gpio_wsel, uart_wsel, spi_wsel, i2c_wsel, pwm_wsel;
   wire adc_wsel, plic_wsel, qspi_wsel, sec_wsel;
   wire brk_wsel, can_wsel, clk_wsel, crypto_wsel, dma_wsel;
   wire dsp_wsel, jtag_wsel, perf_wsel, pmp_wsel, tpu_wsel;
-  wire trace_wsel, usb_wsel;
+  wire trace_wsel, usb_wsel, dbg_wsel, i2c2_wsel, spi2_wsel, uart2_wsel;
   wire gpio_rsel, uart_rsel, spi_rsel, i2c_rsel, pwm_rsel;
   wire adc_rsel, plic_rsel, qspi_rsel, sec_rsel;
   wire brk_rsel, can_rsel, clk_rsel, crypto_rsel, dma_rsel;
   wire dsp_rsel, jtag_rsel, perf_rsel, pmp_rsel, tpu_rsel;
-  wire trace_rsel, usb_rsel;
+  wire trace_rsel, usb_rsel, dbg_rsel, i2c2_rsel, spi2_rsel, uart2_rsel;
   wire any_write_sel, any_read_sel;
 
   wire [63:0] xt_rd;
@@ -117,6 +121,10 @@ module rv64_ai_soc_top (
   assign tpu_wsel  = (axil_awaddr[31:8] == TPU_BASE[31:8])  && axil_awvalid && axil_wvalid;
   assign trace_wsel = (axil_awaddr[31:8] == TRACE_BASE[31:8]) && axil_awvalid && axil_wvalid;
   assign usb_wsel  = (axil_awaddr[31:8] == USB_BASE[31:8])  && axil_awvalid && axil_wvalid;
+  assign dbg_wsel  = (axil_awaddr[31:8] == DBG_BASE[31:8])  && axil_awvalid && axil_wvalid;
+  assign i2c2_wsel = (axil_awaddr[31:8] == I2C2_BASE[31:8]) && axil_awvalid && axil_wvalid;
+  assign spi2_wsel = (axil_awaddr[31:8] == SPI2_BASE[31:8]) && axil_awvalid && axil_wvalid;
+  assign uart2_wsel = (axil_awaddr[31:8] == UART2_BASE[31:8]) && axil_awvalid && axil_wvalid;
 
   assign gpio_rsel = (axil_araddr[31:8] == GPIO_BASE[31:8]) && axil_arvalid;
   assign uart_rsel = (axil_araddr[31:8] == UART_BASE[31:8]) && axil_arvalid;
@@ -139,17 +147,21 @@ module rv64_ai_soc_top (
   assign tpu_rsel  = (axil_araddr[31:8] == TPU_BASE[31:8])  && axil_arvalid;
   assign trace_rsel = (axil_araddr[31:8] == TRACE_BASE[31:8]) && axil_arvalid;
   assign usb_rsel  = (axil_araddr[31:8] == USB_BASE[31:8])  && axil_arvalid;
+  assign dbg_rsel  = (axil_araddr[31:8] == DBG_BASE[31:8])  && axil_arvalid;
+  assign i2c2_rsel = (axil_araddr[31:8] == I2C2_BASE[31:8]) && axil_arvalid;
+  assign spi2_rsel = (axil_araddr[31:8] == SPI2_BASE[31:8]) && axil_arvalid;
+  assign uart2_rsel = (axil_araddr[31:8] == UART2_BASE[31:8]) && axil_arvalid;
 
   assign any_write_sel = gpio_wsel | uart_wsel | spi_wsel | i2c_wsel | pwm_wsel |
                          adc_wsel | plic_wsel | qspi_wsel | sec_wsel | brk_wsel |
                          can_wsel | clk_wsel | crypto_wsel | dma_wsel | dsp_wsel |
                          jtag_wsel | perf_wsel | pmp_wsel | tpu_wsel | trace_wsel |
-                         usb_wsel;
+                         usb_wsel | dbg_wsel | i2c2_wsel | spi2_wsel | uart2_wsel;
   assign any_read_sel  = gpio_rsel | uart_rsel | spi_rsel | i2c_rsel | pwm_rsel |
                          adc_rsel | plic_rsel | qspi_rsel | sec_rsel | brk_rsel |
                          can_rsel | clk_rsel | crypto_rsel | dma_rsel | dsp_rsel |
                          jtag_rsel | perf_rsel | pmp_rsel | tpu_rsel | trace_rsel |
-                         usb_rsel;
+                         usb_rsel | dbg_rsel | i2c2_rsel | spi2_rsel | uart2_rsel;
   assign axil_addr     = (axil_awvalid && axil_wvalid) ? axil_awaddr : axil_araddr;
 
   rv64_ai_gpio u_gpio (
@@ -437,6 +449,59 @@ module rv64_ai_soc_top (
     .valid(xt_valid)
   );
 
+  rv64_ai_debug_module u_dbg (
+    .clk(clk), .rst_n(rst_n),
+    .axil_addr(axil_addr),
+    .axil_wdata(axil_wdata),
+    .axil_wstrb(axil_wstrb),
+    .axil_write(dbg_wsel),
+    .axil_read(dbg_rsel),
+    .axil_rdata(dbg_rdata),
+    .axil_valid(dbg_valid),
+    .debug_halt(),
+    .trace_buf()
+  );
+
+  rv64_ai_i2c2 u_i2c2 (
+    .clk(clk), .rst_n(rst_n),
+    .axil_addr(axil_addr),
+    .axil_wdata(axil_wdata),
+    .axil_wstrb(axil_wstrb),
+    .axil_write(i2c2_wsel),
+    .axil_read(i2c2_rsel),
+    .axil_rdata(i2c2_rdata),
+    .axil_valid(i2c2_valid),
+    .scl(),
+    .sda()
+  );
+
+  rv64_ai_spi2 u_spi2 (
+    .clk(clk), .rst_n(rst_n),
+    .axil_addr(axil_addr),
+    .axil_wdata(axil_wdata),
+    .axil_wstrb(axil_wstrb),
+    .axil_write(spi2_wsel),
+    .axil_read(spi2_rsel),
+    .axil_rdata(spi2_rdata),
+    .axil_valid(spi2_valid),
+    .sclk(),
+    .mosi(),
+    .miso(1'b0)
+  );
+
+  rv64_ai_uart2 u_uart2 (
+    .clk(clk), .rst_n(rst_n),
+    .axil_addr(axil_addr),
+    .axil_wdata(axil_wdata),
+    .axil_wstrb(axil_wstrb),
+    .axil_write(uart2_wsel),
+    .axil_read(uart2_rsel),
+    .axil_rdata(uart2_rdata),
+    .axil_valid(uart2_valid),
+    .tx(),
+    .rx(1'b0)
+  );
+
   rv64_ai_core u_core (
     .clk(clk),
     .rst_n(rst_n),
@@ -499,5 +564,9 @@ module rv64_ai_soc_top (
                         pmp_rsel  ? pmp_rdata  :
                         tpu_rsel  ? tpu_rdata  :
                         trace_rsel ? trace_rdata :
-                        usb_rsel  ? usb_rdata  : 32'b0;
+                        usb_rsel  ? usb_rdata  :
+                        dbg_rsel  ? dbg_rdata  :
+                        i2c2_rsel ? i2c2_rdata :
+                        spi2_rsel ? spi2_rdata :
+                        uart2_rsel ? uart2_rdata : 32'b0;
 endmodule

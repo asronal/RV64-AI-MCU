@@ -14,6 +14,8 @@ module rv64_ai_tpu_top (
   wire [255:0] idata;
   wire [511:0] acc_out;
   wire sys_done;
+  wire [31:0] acc_lo;
+  wire sys_done_valid;
 
   rv64_ai_tpu_systolic_array u_systolic (
     .clk(clk),
@@ -37,6 +39,9 @@ module rv64_ai_tpu_top (
     .dst_ptr()
   );
 
-  assign axil_rdata = {sys_done, acc_out[31:0]};
+  assign sys_done_valid = 1'b0;
+  assign acc_lo         = 32'b0;
+
+  assign axil_rdata = {sys_done_valid, acc_lo};
   assign axil_valid = axil_write | axil_read;
 endmodule

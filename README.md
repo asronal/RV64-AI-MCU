@@ -67,7 +67,7 @@ To maintain modularity and structural clarity across the flat RTL tree, files fo
 | `*_cm.v` | Core & Memory | CPU core logic, control unit, interconnect crossbar, memory interfaces (`core_cm.v`, `xbar_cm.v`) |
 | `*_d.v` | DSP Hardware | Multiply-accumulate units, SIMD engines, DSP controllers (`dsp_d.v`, `mac_d.v`, `simd_d.v`) |
 | `*_a.v` | AI / TPU Accelerators | Tensor processing units, stream engines, TDMA controllers (`tpu_a.v`, `tsa_a.v`, `tdma_a.v`) |
-| `*_ps.v` | Peripherals & Security | SoC top wrapper, security modules, bus peripherals (`soc_ps.v`, `plic_ps.v`, `crypto_ps.v`) |
+| `*_ps.v` | Peripherals & Security | SoC top wrapper, security modules, bus peripherals (`soc_top_ps.v`, `plic_ps.v`, `crypto_ps.v`) |
 
 ---
 

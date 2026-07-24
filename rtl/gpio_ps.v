@@ -13,7 +13,7 @@ module rv64_ai_gpio (
 
   reg [31:0] dir_reg;
   reg [31:0] out_reg;
-  reg [31:0] in_reg;
+  wire [31:0] in_reg;
 
   assign gpio_io = dir_reg ? out_reg : 32'bz;
   assign in_reg = gpio_io;

@@ -1,61 +1,69 @@
 # DC synthesis script for RV64-AI-MCU
 # Usage: dc_shell -f scripts/dc.tcl
 
-set app_var [info exists env(DC_SHELL_MODE)]
+set SCRIPT_DIR [file dirname [info script]]
+set REPO_ROOT  [file normalize [file join $SCRIPT_DIR ..]]
 set DESIGN_NAME "rv64_ai_soc_top"
-set RTL_DIR     "../inputs"
-set SDC_FILE    "../sdc/rv64_ai_soc_top.sdc"
-set WORK_DIR    "./work"
-set LOG_DIR     "./logs"
+set RTL_DIR     [file join $REPO_ROOT "rtl"]
+set SDC_FILE    [file join $REPO_ROOT "sdc" "rv64_ai_soc_top.sdc"]
+set WORK_DIR    [file join $REPO_ROOT "work"]
+set LOG_DIR     [file join $REPO_ROOT "logs"]
 
 file mkdir $WORK_DIR
 file mkdir $LOG_DIR
 
 set search_path [concat $search_path $RTL_DIR]
-set target_library     ""
-set link_library       "*"
+set target_library ""
+set link_library "*"
 
 set RTL_FILES [list \
-  ../inputs/adc_ps.v \
-  ../inputs/brk_ps.v \
-  ../inputs/can_ps.v \
-  ../inputs/clk_ps.v \
-  ../inputs/core_cm.v \
-  ../inputs/crypto_ps.v \
-  ../inputs/ctrl_cm.v \
-  ../inputs/dbg_ps.v \
-  ../inputs/dma_ps.v \
-  ../inputs/dsp_d.v \
-  ../inputs/dspc_d.v \
-  ../inputs/dspkg_d.v \
-  ../inputs/gpio_ps.v \
-  ../inputs/i2c_ps.v \
-  ../inputs/i2c2_ps.v \
-  ../inputs/jtag_ps.v \
-  ../inputs/mac_d.v \
-  ../inputs/mem_cm.v \
-  ../inputs/perf_ps.v \
-  ../inputs/pkg_cm.v \
-  ../inputs/plic_ps.v \
-  ../inputs/pmp_ps.v \
-  ../inputs/pwm_ps.v \
-  ../inputs/qspi_ps.v \
-  ../inputs/sec_ps.v \
-  ../inputs/simd_d.v \
-  ../inputs/soc_ps.v \
-  ../inputs/spi_ps.v \
-  ../inputs/spi2_ps.v \
-  ../inputs/tdma_a.v \
-  ../inputs/tpu_a.v \
-  ../inputs/tpupkg_a.v \
-  ../inputs/trace_ps.v \
-  ../inputs/tsa_a.v \
-  ../inputs/uart_ps.v \
-  ../inputs/uart2_ps.v \
-  ../inputs/usb_ps.v \
-  ../inputs/xbar_cm.v \
-  ../inputs/xt_a.v \
+  [file join $RTL_DIR "adc_ps.v"] \
+  [file join $RTL_DIR "brk_ps.v"] \
+  [file join $RTL_DIR "can_ps.v"] \
+  [file join $RTL_DIR "clk_ps.v"] \
+  [file join $RTL_DIR "core_cm.v"] \
+  [file join $RTL_DIR "crypto_ps.v"] \
+  [file join $RTL_DIR "ctrl_cm.v"] \
+  [file join $RTL_DIR "dbg_ps.v"] \
+  [file join $RTL_DIR "dma_ps.v"] \
+  [file join $RTL_DIR "dsp_d.v"] \
+  [file join $RTL_DIR "dspc_d.v"] \
+  [file join $RTL_DIR "dspkg_d.v"] \
+  [file join $RTL_DIR "gpio_ps.v"] \
+  [file join $RTL_DIR "i2c_ps.v"] \
+  [file join $RTL_DIR "i2c2_ps.v"] \
+  [file join $RTL_DIR "jtag_ps.v"] \
+  [file join $RTL_DIR "mac_d.v"] \
+  [file join $RTL_DIR "mem_bank.v"] \
+  [file join $RTL_DIR "mem_cm.v"] \
+  [file join $RTL_DIR "perf_ps.v"] \
+  [file join $RTL_DIR "pkg_cm.v"] \
+  [file join $RTL_DIR "plic_ps.v"] \
+  [file join $RTL_DIR "pmp_ps.v"] \
+  [file join $RTL_DIR "pwm_ps.v"] \
+  [file join $RTL_DIR "qspi_ps.v"] \
+  [file join $RTL_DIR "sec_ps.v"] \
+  [file join $RTL_DIR "simd_d.v"] \
+  [file join $RTL_DIR "soc_top_ps.v"] \
+  [file join $RTL_DIR "spi_ps.v"] \
+  [file join $RTL_DIR "spi2_ps.v"] \
+  [file join $RTL_DIR "tdma_a.v"] \
+  [file join $RTL_DIR "tpu_a.v"] \
+  [file join $RTL_DIR "tpupkg_a.v"] \
+  [file join $RTL_DIR "trace_ps.v"] \
+  [file join $RTL_DIR "tsa_a.v"] \
+  [file join $RTL_DIR "uart_ps.v"] \
+  [file join $RTL_DIR "uart2_ps.v"] \
+  [file join $RTL_DIR "usb_ps.v"] \
+  [file join $RTL_DIR "xbar_cm.v"] \
+  [file join $RTL_DIR "xt_a.v"] \
 ]
+
+foreach rtl_file $RTL_FILES {
+  if { ![file exists $rtl_file] } {
+    error "Missing RTL source: $rtl_file"
+  }
+}
 
 analyze -format verilog -library work -autoread $RTL_FILES
 elaborate $DESIGN_NAME
@@ -69,11 +77,11 @@ if { [file exists $SDC_FILE] } {
 
 compile_ultra -gate_clock
 
-write -format ddc -hierarchy -output "$WORK_DIR/${DESIGN_NAME}.ddc"
-write -format verilog -hierarchy -output "$WORK_DIR/${DESIGN_NAME}.v"
-report_area > "$LOG_DIR/${DESIGN_NAME}_area.rpt"
-report_timing > "$LOG_DIR/${DESIGN_NAME}_timing.rpt"
-report_power > "$LOG_DIR/${DESIGN_NAME}_power.rpt"
-report_qor > "$LOG_DIR/${DESIGN_NAME}_qor.rpt"
+write -format ddc -hierarchy -output [file join $WORK_DIR "${DESIGN_NAME}.ddc"]
+write -format verilog -hierarchy -output [file join $WORK_DIR "${DESIGN_NAME}.v"]
+report_area > [file join $LOG_DIR "${DESIGN_NAME}_area.rpt"]
+report_timing > [file join $LOG_DIR "${DESIGN_NAME}_timing.rpt"]
+report_power > [file join $LOG_DIR "${DESIGN_NAME}_power.rpt"]
+report_qor > [file join $LOG_DIR "${DESIGN_NAME}_qor.rpt"]
 
 puts "DC synthesis completed for $DESIGN_NAME"

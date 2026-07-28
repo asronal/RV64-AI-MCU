@@ -1,0 +1,31 @@
+ 
+****************************************
+Report : area
+Design : rv64_ai_soc_top
+Version: V-2023.12-SP5-3
+Date   : Mon Jul 27 14:44:14 2026
+****************************************
+
+Library(s) Used:
+
+    saed32hvt_ss0p75v125c (File: /home/rithicks/riscv/syn/inputs/saed32hvt_ss0p75v125c.db)
+    saed32rvt_ss0p75v125c (File: /home/rithicks/riscv/syn/inputs/saed32rvt_ss0p75v125c.db)
+
+Number of ports:                          186
+Number of nets:                          6662
+Number of cells:                         6437
+Number of combinational cells:           4514
+Number of sequential cells:              1921
+Number of macros/black boxes:               0
+Number of buf/inv:                        476
+Number of references:                      54
+
+Combinational area:              12445.177750
+Buf/Inv area:                      829.271889
+Noncombinational area:           13547.908589
+Macro/Black Box area:                0.000000
+Net Interconnect area:           10502.754051
+
+Total cell area:                 25993.086339
+Total area:                      36495.840390
+1

@@ -215,14 +215,10 @@ dc_shell -f scripts/dc.tcl
 
 This project was developed as a team effort. The section below is ready to be filled with your teammates and their GitHub profiles so that the project history, ownership, and collaboration are easy to track.
 
-### Contributor Template
 
-- [Your Name](https://github.com/your-github-username) — Project lead / RTL integration
-- [Teammate 1](https://github.com/teammate1-github) — Verification and simulation
-- [Teammate 2](https://github.com/teammate2-github) — Synthesis and timing analysis
-- [Teammate 3](https://github.com/teammate3-github) — Documentation and reporting
-
-If you want, you can replace the placeholder links with the actual GitHub profiles of your team members and keep the same structure.
+- [Asron](https://github.com/asronal)
+- [Dharani N](https://github.com/natarajandharani13-afk)
+- [Abhishiek D](https://github.com/AbhishiekDevanand)
 
 ---
 

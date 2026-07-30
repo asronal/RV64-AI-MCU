@@ -75,6 +75,134 @@ The top-level integration point is `rtl/soc_top_ps.v`.
 
 ---
 
+## Technical Details
+
+This section summarizes the main hardware components present in the SoC, including memory types, processor and accelerator units, and system-level peripherals.
+
+### Memory Architecture
+
+- `rtl/mem_cm.v` and `rtl/mem_bank.v` implement the main memory subsystem.
+- The design includes explicit bank instances for:
+  - Boot ROM
+  - Internal SRAM
+  - Tensor SRAM
+  - One-time programmable (OTP) memory
+  - Instruction cache (I-cache)
+  - Data cache (D-cache)
+- Memory banks are initialized through the top-level reset/init path and are accessed by the core through the `mem_cm` subsystem.
+
+### Core and Execution Units
+
+- `rtl/core_cm.v` contains the RV64-style core execution pipeline and register file.
+- The core is responsible for instruction fetch, decode, execution, and data memory access.
+- It exposes instruction and data memory interfaces to the memory subsystem and performance counter outputs for monitoring.
+
+### DSP Subsystem
+
+- DSP-related modules are grouped under `rtl/` with file suffixes such as `_d.v`.
+- Key DSP blocks include:
+  - `dsp_d.v`
+  - `dspc_d.v`
+  - `mac_d.v`
+  - `simd_d.v`
+  - `dspkg_d.v`
+- These units provide arithmetic and signal-processing capabilities that complement the core for high-throughput compute.
+
+### TPU and AI Accelerators
+
+- AI/TPU accelerators are implemented in the `*_a.v` files.
+- Important AI-related blocks include:
+  - `tpu_a.v`
+  - `tsa_a.v`
+  - `tdma_a.v`
+  - `xt_a.v`
+  - `tpupkg_a.v`
+- These modules support tensor processing, matrix operations, and accelerator-oriented data movement inside the SoC.
+
+### Peripheral and System Units
+
+- The SoC includes an extensive set of peripheral controllers and system services:
+  - GPIO, UART, SPI, I2C, QSPI, PWM, ADC
+  - PLIC interrupt controller, security engine, crypto engine
+  - Debug unit, trace buffer, performance counters, breakpoint logic
+- These units are accessible through a lightweight AXI-Lite-like register interface managed by the top-level wrapper.
+
+### Top-Level Integration
+
+- `rtl/soc_top_ps.v` stitches together all of the above subsystems into a single chip-level design.
+- It routes the AXI-Lite-like control bus, distributes reset/init signals, and instantiates the core, memory subsystem, DSP/TPU accelerators, and peripheral blocks.
+- The top-level module is the main entry point for simulation and synthesis of the complete SoC.
+
+---
+
+## Detailed Technical Specification
+
+This design targets a fully synthesizable RV64-AI-MCU SoC with advanced compute, memory, and security features.
+
+### Processor Core and ISA
+
+- RV64IMC ISA support with a 5-stage pipeline: IF, ID, EX, MEM, WB.
+- Forwarding, hazard detection, pipeline stalls, flushing, and load-use hazard handling.
+- 2-bit dynamic branch prediction and Branch Target Buffer (BTB).
+- Optional Return Address Stack and Machine Mode support.
+- 32 × 64-bit general-purpose registers and performance counters.
+- Modular control unit architecture in the core path.
+
+### Memory Subsystem
+
+- 64 KB Boot ROM.
+- 512 KB internal SRAM.
+- 256 KB dedicated Tensor SRAM.
+- 4 KB OTP memory.
+- 32 KB Instruction Cache.
+- 32 KB Data Cache.
+- 16 MB external QSPI Flash with Execute-In-Place (XIP) support.
+- 8 MB Octal SPI PSRAM (expandable to 16 MB).
+- AXI4-Lite crossbar interconnect connecting CPU, memories, DMA, peripherals, DSP, TPU, and security modules.
+
+### DSP Subsystem
+
+- Dedicated DSP coprocessor connected through the AXI4-Lite interconnect.
+- 128-bit SIMD engine and 128-bit accumulator MAC engine.
+- INT8, INT16, INT32, and INT64 arithmetic support.
+- 4× INT8 MAC per cycle, 2× INT16 MAC per cycle, 1× INT32 MAC per cycle, 1× INT64 MAC per cycle.
+- Vector operations including add, subtract, multiply, MAC, dot product, min/max, clipping, rounding, averaging, saturating arithmetic, shifts, pack/unpack, shuffle, permute, compare, and vector reduction.
+- Dedicated hardware accelerators for FFT/IFFT, FIR/IIR filters, 1D/2D convolution, depthwise convolution, pointwise convolution, grouped/dilated convolution, cross correlation, auto correlation, normalized correlation, matrix operations, and more.
+- Matrix support up to 32×32, with local memories where appropriate.
+
+### TPU and AI Accelerator Subsystem
+
+- Dedicated INT8 TPU optimized for TinyML and TensorFlow Lite Micro.
+- 16×16 systolic array with 256 INT8 MAC units.
+- INT16 and INT32 accumulation results.
+- 256 KB Tensor SRAM and dedicated Tensor DMA.
+- Double buffering and a high-bandwidth tensor memory controller.
+- Hardware acceleration for GEMM, matrix multiplication, Conv2D, depthwise/pointwise convolution, pooling, activation functions, normalization, quantization, dequantization, tensor copy/fill/reshape/concatenate.
+- Custom XTENSOR instruction extension for TPU command issuing while maintaining RV64IMC ISA compatibility.
+
+### Peripheral and System Subsystem
+
+- GPIO, 2× UART, 2× SPI, 2× I²C, PWM, timers, watchdog, RTC.
+- 12-bit ADC, USB Full-Speed, CAN FD.
+- Platform-Level Interrupt Controller (PLIC), CLINT timer, QSPI Flash controller, Octal SPI PSRAM controller.
+- 8-channel scatter-gather DMA controller.
+
+### IoT Security and System Control
+
+- Secure Boot, AES-128, AES-256, SHA-256, SHA-512, CRC32.
+- True Random Number Generator (TRNG), Physical Memory Protection (PMP), secure firmware update.
+- Anti-rollback protection, secure JTAG lock, OTP key storage, device unique ID.
+- Clock gating, sleep modes, deep sleep, peripheral clock gating, wake-up controller.
+- RISC-V Debug Module, JTAG, hardware breakpoints, watchpoints, trace buffer, performance counters.
+
+### Integration Notes
+
+- The full subsystem is designed to integrate cleanly with the AXI4-Lite interconnect.
+- The RTL is intended to be modular, synthesizable, and suitable for Synopsys Design Compiler.
+- This repo focuses on a complete chip-level integration with a top-level wrapper, verification bench, and synthesis/constraint support.
+
+---
+
 ## Repository Structure
 
 The repository is organized into a small set of directories that separate documentation, RTL sources, verification, and synthesis outputs.

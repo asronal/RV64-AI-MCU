@@ -161,7 +161,7 @@ module tb;
   endtask
 
   initial begin
-    $dumpfile("soc_top_tb.vcd");
+    $dumpfile("outputs/riscv_sim.vcd");
     $dumpvars(0, tb);
     $dumpvars(0, tb.u_dut);
     $dumpvars(0, tb.u_dut.gen_core_mem.u_core);

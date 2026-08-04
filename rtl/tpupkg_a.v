@@ -1,3 +1,5 @@
+`timescale 1ns/1ps
+
 `ifndef RV64_AI_TPU_PKG_V
 `define RV64_AI_TPU_PKG_V
 

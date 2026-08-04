@@ -145,9 +145,29 @@ module tb;
     end
   endtask
 
+  task check_reset_condition;
+    input [255:0] desc;
+    input integer cond;
+    begin
+      test_count = test_count + 1;
+      if (cond) begin
+        $display("[PASS] reset-init check: %s", desc);
+        test_passed = test_passed + 1;
+      end else begin
+        $display("[FAIL] reset-init check: %s", desc);
+        test_failed = test_failed + 1;
+      end
+    end
+  endtask
+
   initial begin
     $dumpfile("soc_top_tb.vcd");
     $dumpvars(0, tb);
+    $dumpvars(0, tb.u_dut);
+    $dumpvars(0, tb.u_dut.gen_core_mem.u_core);
+    $dumpvars(0, tb.u_dut.gen_core_mem.u_mem);
+    $dumpvars(0, tb.u_dut.gen_peripherals.u_gpio);
+    $dumpvars(0, tb.u_dut.gen_peripherals.u_xt);
 
     clk = 0;
     rst_n = 0;
@@ -184,24 +204,45 @@ module tb;
     $display("[DBG] gpio dir_reg=0x%h", u_dut.gen_peripherals.u_gpio.dir_reg);
     $display("[DBG] xt rd=0x%h", u_dut.gen_peripherals.u_xt.rd);
 
-    if (u_dut.gen_core_mem.u_mem.u_boot_rom.mem[0] === 64'h0 &&
-        u_dut.gen_core_mem.u_mem.u_internal_sram.mem[0] === 64'h0 &&
-        u_dut.gen_core_mem.u_mem.u_tensor_sram.mem[0] === 64'h0 &&
-        u_dut.gen_core_mem.u_mem.u_otp.mem[0] === 64'h0 &&
-        u_dut.gen_core_mem.u_mem.u_icache.mem[0] === 64'h0 &&
-        u_dut.gen_core_mem.u_mem.u_dcache.mem[0] === 64'h0 &&
-        u_dut.gen_core_mem.u_core.pc_if === 64'h0 &&
-        u_dut.gen_core_mem.u_core.gpr[0] === 64'h0 &&
-        u_dut.gen_core_mem.u_core.perf_counter[0] === 64'h0 &&
-        u_dut.gen_peripherals.u_gpio.dir_reg === 32'h0 &&
-        u_dut.gen_peripherals.u_xt.rd === 64'h0) begin
-      $display("[PASS] core and memory state initialized by reset");
-      test_passed = test_passed + 1;
-    end else begin
-      $display("[FAIL] reset initialization check failed");
-      test_failed = test_failed + 1;
-    end
-    test_count = test_count + 1;
+    check_reset_condition("core and memory bank banks are zeroed on reset",
+      u_dut.gen_core_mem.u_mem.u_boot_rom.mem[0] === 64'h0 &&
+      u_dut.gen_core_mem.u_mem.u_internal_sram.mem[0] === 64'h0 &&
+      u_dut.gen_core_mem.u_mem.u_tensor_sram.mem[0] === 64'h0 &&
+      u_dut.gen_core_mem.u_mem.u_otp.mem[0] === 64'h0 &&
+      u_dut.gen_core_mem.u_mem.u_icache.mem[0] === 64'h0 &&
+      u_dut.gen_core_mem.u_mem.u_dcache.mem[0] === 64'h0);
+
+    check_reset_condition("core pipeline and GPR state cleared",
+      u_dut.gen_core_mem.u_core.pc_if === 64'h0 &&
+      u_dut.gen_core_mem.u_core.pc_id === 64'h0 &&
+      u_dut.gen_core_mem.u_core.pc_ex === 64'h0 &&
+      u_dut.gen_core_mem.u_core.pc_mem === 64'h0 &&
+      u_dut.gen_core_mem.u_core.pc_wb === 64'h0 &&
+      u_dut.gen_core_mem.u_core.gpr[0] === 64'h0 &&
+      u_dut.gen_core_mem.u_core.gpr[1] === 64'h0 &&
+      u_dut.gen_core_mem.u_core.gpr[31] === 64'h0);
+
+    check_reset_condition("performance counters and fetch address ports reset to zero",
+      u_dut.gen_core_mem.u_core.perf_counter[0] === 64'h0 &&
+      u_dut.gen_core_mem.u_core.perf_counter[1] === 64'h0 &&
+      u_dut.gen_core_mem.u_core.perf_counter[7] === 64'h0 &&
+      u_dut.gen_core_mem.u_core.imem_addr === 64'h0 &&
+      u_dut.gen_core_mem.u_core.dmem_addr === 64'h0);
+
+    check_reset_condition("gpio direction/out registers initialized to zero",
+      u_dut.gen_peripherals.u_gpio.dir_reg === 32'h0 &&
+      u_dut.gen_peripherals.u_gpio.out_reg === 32'h0);
+
+    check_reset_condition("xtensor extension result and valid are reset cleanly",
+      u_dut.gen_peripherals.u_xt.rd === 64'h0 &&
+      u_dut.gen_peripherals.u_xt.valid === 1'b0);
+
+    check_reset_condition("top-level AXI handshakes are idle after reset",
+      u_dut.axil_awready === 1'b1 &&
+      u_dut.axil_wready === 1'b1 &&
+      u_dut.axil_arready === 1'b1 &&
+      u_dut.axil_bvalid === 1'b0 &&
+      u_dut.axil_rvalid === 1'b0);
 
     #20;
     rst_n = 1;

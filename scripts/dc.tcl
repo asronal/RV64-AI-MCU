@@ -16,47 +16,13 @@ set search_path [concat $search_path $RTL_DIR]
 set target_library ""
 set link_library "*"
 
-set RTL_FILES [list \
-  [file join $RTL_DIR "adc_ps.v"] \
-  [file join $RTL_DIR "brk_ps.v"] \
-  [file join $RTL_DIR "can_ps.v"] \
-  [file join $RTL_DIR "clk_ps.v"] \
-  [file join $RTL_DIR "core_cm.v"] \
-  [file join $RTL_DIR "crypto_ps.v"] \
-  [file join $RTL_DIR "ctrl_cm.v"] \
-  [file join $RTL_DIR "dbg_ps.v"] \
-  [file join $RTL_DIR "dma_ps.v"] \
-  [file join $RTL_DIR "dsp_d.v"] \
-  [file join $RTL_DIR "dspc_d.v"] \
-  [file join $RTL_DIR "dspkg_d.v"] \
-  [file join $RTL_DIR "gpio_ps.v"] \
-  [file join $RTL_DIR "i2c_ps.v"] \
-  [file join $RTL_DIR "i2c2_ps.v"] \
-  [file join $RTL_DIR "jtag_ps.v"] \
-  [file join $RTL_DIR "mac_d.v"] \
-  [file join $RTL_DIR "mem_bank.v"] \
-  [file join $RTL_DIR "mem_cm.v"] \
-  [file join $RTL_DIR "perf_ps.v"] \
-  [file join $RTL_DIR "pkg_cm.v"] \
-  [file join $RTL_DIR "plic_ps.v"] \
-  [file join $RTL_DIR "pmp_ps.v"] \
-  [file join $RTL_DIR "pwm_ps.v"] \
-  [file join $RTL_DIR "qspi_ps.v"] \
-  [file join $RTL_DIR "sec_ps.v"] \
-  [file join $RTL_DIR "simd_d.v"] \
-  [file join $RTL_DIR "soc_top_ps.v"] \
-  [file join $RTL_DIR "spi_ps.v"] \
-  [file join $RTL_DIR "spi2_ps.v"] \
-  [file join $RTL_DIR "tdma_a.v"] \
-  [file join $RTL_DIR "tpu_a.v"] \
-  [file join $RTL_DIR "tpupkg_a.v"] \
-  [file join $RTL_DIR "trace_ps.v"] \
-  [file join $RTL_DIR "tsa_a.v"] \
-  [file join $RTL_DIR "uart_ps.v"] \
-  [file join $RTL_DIR "uart2_ps.v"] \
-  [file join $RTL_DIR "usb_ps.v"] \
-  [file join $RTL_DIR "xbar_cm.v"] \
-  [file join $RTL_DIR "xt_a.v"] \
+set RTL_FILES [concat \
+  [lsort [glob -nocomplain -directory $RTL_DIR "rv64_ai_*.v"]] \
+  [list \
+    [file join $RTL_DIR "pkg_cm.v"] \
+    [file join $RTL_DIR "mem_bank.v"] \
+    [file join $RTL_DIR "mem_cm.v"] \
+  ] \
 ]
 
 foreach rtl_file $RTL_FILES {

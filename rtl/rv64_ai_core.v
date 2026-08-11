@@ -35,7 +35,8 @@ parameter RAS_DEPTH = 16;
   integer i;
 
   reg [63:0] pc_if, pc_id, pc_ex, pc_mem, pc_wb;
-  reg [31:0] instr_if, instr_id, instr_ex, instr_mem, instr_wb;
+  wire [31:0] instr_if;
+  reg [31:0] instr_id, instr_ex, instr_mem, instr_wb;
   reg [63:0] gpr [0:GPR_DEPTH-1];
   wire [63:0] pc_next_if;
   reg [63:0] branch_target;
@@ -113,7 +114,7 @@ parameter RAS_DEPTH = 16;
   assign instr_if = ctrl_valid ? imem_rdata[31:0] : 32'h00000013;
 
   always @(posedge clk or negedge rst_n) begin
-    if (!rst_n || init) begin
+    if (!rst_n) begin
       pc_if <= 64'h0;
       pc_id <= 64'h0;
       pc_ex <= 64'h0;
@@ -131,18 +132,10 @@ parameter RAS_DEPTH = 16;
       for (i = 0; i < PERF_CNTRS; i = i + 1) begin
         perf_counter[i] <= 64'b0;
       end
-      dmem_addr <= 64'b0;
-      dmem_wdata <= 64'b0;
-      dmem_wstrb <= 8'h0;
-      dmem_read <= 1'b0;
-      dmem_write <= 1'b0;
       imem_addr <= 64'b0;
       imem_read <= 1'b0;
       branch_taken <= 1'b0;
       branch_target <= 64'b0;
-      alu_result <= 64'b0;
-      rs1_data <= 64'b0;
-      rs2_data <= 64'b0;
       mem_data <= 64'b0;
       wb_data <= 64'b0;
     end else begin

@@ -63,6 +63,50 @@ module rv64_ai_soc_top (
   wire trace_valid, usb_valid, dbg_valid, i2c2_valid, spi2_valid, uart2_valid;
   wire [31:0] axil_addr;
 
+  wire [31:0] unused_cpu_awaddr = 32'b0;
+  wire [2:0]  unused_cpu_awprot = 3'b0;
+  wire        unused_cpu_awvalid = 1'b0;
+  wire        unused_cpu_awready;
+  wire [63:0] unused_cpu_wdata = 64'b0;
+  wire [7:0]  unused_cpu_wstrb = 8'b0;
+  wire        unused_cpu_wvalid = 1'b0;
+  wire        unused_cpu_wready;
+  wire [1:0]  unused_cpu_bresp;
+  wire        unused_cpu_bvalid;
+  wire        unused_cpu_bready = 1'b0;
+  wire [31:0] unused_cpu_araddr = 32'b0;
+  wire [2:0]  unused_cpu_arprot = 3'b0;
+  wire        unused_cpu_arvalid = 1'b0;
+  wire        unused_cpu_arready;
+  wire [63:0] unused_cpu_rdata;
+  wire [1:0]  unused_cpu_rresp;
+  wire        unused_cpu_rvalid;
+  wire        unused_cpu_rready = 1'b0;
+  wire [63:0] unused_rom_rdata;
+  wire [63:0] unused_sram_rdata;
+  wire [63:0] unused_tpu_rdata;
+  wire [63:0] unused_dma_rdata;
+
+  wire [31:0] unused_cp_axil_awaddr = 32'b0;
+  wire [2:0]  unused_cp_axil_awprot = 3'b0;
+  wire        unused_cp_axil_awvalid = 1'b0;
+  wire        unused_cp_axil_awready;
+  wire [31:0] unused_cp_axil_wdata = 32'b0;
+  wire [3:0]  unused_cp_axil_wstrb = 4'b0;
+  wire        unused_cp_axil_wvalid = 1'b0;
+  wire        unused_cp_axil_wready;
+  wire [1:0]  unused_cp_axil_bresp;
+  wire        unused_cp_axil_bvalid;
+  wire        unused_cp_axil_bready = 1'b0;
+  wire [31:0] unused_cp_axil_araddr = 32'b0;
+  wire [2:0]  unused_cp_axil_arprot = 3'b0;
+  wire        unused_cp_axil_arvalid = 1'b0;
+  wire        unused_cp_axil_arready;
+  wire [31:0] unused_cp_axil_rdata;
+  wire [1:0]  unused_cp_axil_rresp;
+  wire        unused_cp_axil_rvalid;
+  wire        unused_cp_axil_rready = 1'b0;
+
   wire gpio_wsel, uart_wsel, spi_wsel, i2c_wsel, pwm_wsel;
   wire adc_wsel, plic_wsel, qspi_wsel, sec_wsel;
   wire brk_wsel, can_wsel, clk_wsel, crypto_wsel, dma_wsel;
@@ -602,6 +646,59 @@ module rv64_ai_soc_top (
         .write(mem_write),
         .rdata(mem_rdata),
         .valid(mem_valid)
+      );
+
+      rv64_ai_axi4lite_crossbar u_axi4lite_crossbar (
+        .clk(clk),
+        .rst_n(rst_n),
+        .cpu_awaddr(unused_cpu_awaddr),
+        .cpu_awprot(unused_cpu_awprot),
+        .cpu_awvalid(unused_cpu_awvalid),
+        .cpu_awready(unused_cpu_awready),
+        .cpu_wdata(unused_cpu_wdata),
+        .cpu_wstrb(unused_cpu_wstrb),
+        .cpu_wvalid(unused_cpu_wvalid),
+        .cpu_wready(unused_cpu_wready),
+        .cpu_bresp(unused_cpu_bresp),
+        .cpu_bvalid(unused_cpu_bvalid),
+        .cpu_bready(unused_cpu_bready),
+        .cpu_araddr(unused_cpu_araddr),
+        .cpu_arprot(unused_cpu_arprot),
+        .cpu_arvalid(unused_cpu_arvalid),
+        .cpu_arready(unused_cpu_arready),
+        .cpu_rdata(unused_cpu_rdata),
+        .cpu_rresp(unused_cpu_rresp),
+        .cpu_rvalid(unused_cpu_rvalid),
+        .cpu_rready(unused_cpu_rready),
+        .rom_rdata(unused_rom_rdata),
+        .sram_rdata(unused_sram_rdata),
+        .tpu_rdata(unused_tpu_rdata),
+        .dma_rdata(unused_dma_rdata)
+      );
+
+      rv64_ai_dsp_coprocessor u_dsp_coprocessor (
+        .clk(clk),
+        .rst_n(rst_n),
+        .init(sys_init),
+        .axil_awaddr(unused_cp_axil_awaddr),
+        .axil_awprot(unused_cp_axil_awprot),
+        .axil_awvalid(unused_cp_axil_awvalid),
+        .axil_awready(unused_cp_axil_awready),
+        .axil_wdata(unused_cp_axil_wdata),
+        .axil_wstrb(unused_cp_axil_wstrb),
+        .axil_wvalid(unused_cp_axil_wvalid),
+        .axil_wready(unused_cp_axil_wready),
+        .axil_bresp(unused_cp_axil_bresp),
+        .axil_bvalid(unused_cp_axil_bvalid),
+        .axil_bready(unused_cp_axil_bready),
+        .axil_araddr(unused_cp_axil_araddr),
+        .axil_arprot(unused_cp_axil_arprot),
+        .axil_arvalid(unused_cp_axil_arvalid),
+        .axil_arready(unused_cp_axil_arready),
+        .axil_rdata(unused_cp_axil_rdata),
+        .axil_rresp(unused_cp_axil_rresp),
+        .axil_rvalid(unused_cp_axil_rvalid),
+        .axil_rready(unused_cp_axil_rready)
       );
     end
   endgenerate

@@ -1,4 +1,10 @@
+<div align="center">
+
 # RV64-AI-MCU RTL Handoff Repository
+
+</div>
+
+---
 
 ## Project Overview
 
@@ -27,6 +33,7 @@ This makes the repository useful both as a design reference and as a handoff pac
 The SoC is divided into several functional groups:
 
 ### 1. Core and Memory Subsystem
+
 These modules handle the core execution path, memory access, and interconnect behavior. Representative files include:
 
 - `core_cm.v`
@@ -36,6 +43,7 @@ These modules handle the core execution path, memory access, and interconnect be
 - `pkg_cm.v`
 
 ### 2. DSP Subsystem
+
 This group includes arithmetic and DSP-focused hardware blocks for signal-processing style workloads:
 
 - `dsp_d.v`
@@ -45,6 +53,7 @@ This group includes arithmetic and DSP-focused hardware blocks for signal-proces
 - `dspkg_d.v`
 
 ### 3. AI and TPU-Related Accelerators
+
 The AI side of the design includes tensor-oriented processing and data movement blocks:
 
 - `tpu_a.v`
@@ -54,6 +63,7 @@ The AI side of the design includes tensor-oriented processing and data movement 
 - `tpupkg_a.v`
 
 ### 4. Peripherals and Security Blocks
+
 The peripheral and security domain adds the interface and system-control features needed for a complete SoC:
 
 - `gpio_ps.v`
@@ -264,9 +274,9 @@ riscv/
 │   └── xt_a.v
 ├── scripts/                       # Synthesis automation scripts
 │   └── dc.tcl
-├── sdc/                           # Timing constraints for synthesis
+├── sdc/                            # Timing constraints for synthesis
 │   └── rv64_ai_soc_top.sdc
-└── tb/                            # Verification testbench
+└── tb/                             # Verification testbench
     └── tb.v
 ```
 

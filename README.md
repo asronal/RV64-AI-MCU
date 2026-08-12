@@ -354,7 +354,7 @@ dc_shell -f scripts/syn.tcl.tcl
 
 ## Team and Contributors
 
-This project was developed as a team effort. The section below is ready to be filled with your teammates and their GitHub profiles so that the project history, ownership, and collaboration are easy to track.
+This project was developed as a team effort by:
 
 
 - [Asron](https://github.com/asronal)

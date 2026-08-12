@@ -36,52 +36,56 @@ The SoC is divided into several functional groups:
 
 These modules handle the core execution path, memory access, and interconnect behavior. Representative files include:
 
-- `core_cm.v`
-- `ctrl_cm.v`
-- `mem_cm.v`
-- `xbar_cm.v`
+- `rv64_ai_core.v`
+- `rv64_ai_control_unit.v`
+- `rv64_ai_memory_subsystem.v`
+- `rv64_ai_axi4lite_crossbar.v`
 - `pkg_cm.v`
 
 ### 2. DSP Subsystem
 
 This group includes arithmetic and DSP-focused hardware blocks for signal-processing style workloads:
 
-- `dsp_d.v`
-- `dspc_d.v`
-- `mac_d.v`
-- `simd_d.v`
+- `rv64_ai_dsp_coprocessor.v`
+- `rv64_ai_dsp_top.v`
+- `rv64_ai_mac_engine.v`
+- `rv64_ai_simd_engine.v`
 - `dspkg_d.v`
 
 ### 3. AI and TPU-Related Accelerators
 
 The AI side of the design includes tensor-oriented processing and data movement blocks:
 
-- `tpu_a.v`
-- `tsa_a.v`
-- `tdma_a.v`
-- `xt_a.v`
+- `rv64_ai_tpu_top.v`
+- `rv64_ai_tpu_systolic_array.v`
+- `rv64_ai_tpu_dma.v`
+- `rv64_ai_xtensor_extension.v`
 - `tpupkg_a.v`
 
 ### 4. Peripherals and Security Blocks
 
 The peripheral and security domain adds the interface and system-control features needed for a complete SoC:
 
-- `gpio_ps.v`
-- `uart_ps.v`
-- `spi_ps.v`
-- `i2c_ps.v`
-- `qspi_ps.v`
-- `pwm_ps.v`
-- `adc_ps.v`
-- `plic_ps.v`
-- `sec_ps.v`
-- `crypto_ps.v`
-- `dbg_ps.v`
-- `trace_ps.v`
-- `perf_ps.v`
-- `brk_ps.v`
+- `rv64_ai_gpio.v`
+- `rv64_ai_uart.v`
+- `rv64_ai_uart2.v`
+- `rv64_ai_spi.v`
+- `rv64_ai_spi2.v`
+- `rv64_ai_i2c.v`
+- `rv64_ai_i2c2.v`
+- `rv64_ai_qspi_psram_dma.v`
+- `rv64_ai_pwm_timer_wdt_rtc.v`
+- `rv64_ai_adc_usb_can.v`
+- `rv64_ai_plic_clint_debug.v`
+- `rv64_ai_security_block.v`
+- `rv64_ai_crypto_engine.v`
+- `rv64_ai_debug_module.v`
+- `rv64_ai_jtag_debug.v`
+- `rv64_ai_trace_buffer.v`
+- `rv64_ai_perf_counters.v`
+- `rv64_ai_breakpoint_unit.v`
 
-The top-level integration point is `rtl/soc_top_ps.v`.
+The top-level integration point is `rtl/rv64_ai_soc_top.v`.
 
 ---
 
@@ -91,7 +95,7 @@ This section summarizes the main hardware components present in the SoC, includi
 
 ### Memory Architecture
 
-- `rtl/mem_cm.v` and `rtl/mem_bank.v` implement the main memory subsystem.
+- `rtl/rv64_ai_memory_subsystem.v` and `rtl/rv64_ai_mem_bank.v` implement the main memory subsystem.
 - The design includes explicit bank instances for:
   - Boot ROM
   - Internal SRAM
@@ -99,33 +103,33 @@ This section summarizes the main hardware components present in the SoC, includi
   - One-time programmable (OTP) memory
   - Instruction cache (I-cache)
   - Data cache (D-cache)
-- Memory banks are initialized through the top-level reset/init path and are accessed by the core through the `mem_cm` subsystem.
+- Memory banks are initialized through the top-level reset/init path and are accessed by the core through the `rv64_ai_memory_subsystem` subsystem.
 
 ### Core and Execution Units
 
-- `rtl/core_cm.v` contains the RV64-style core execution pipeline and register file.
+- `rtl/rv64_ai_core.v` contains the RV64-style core execution pipeline and register file.
 - The core is responsible for instruction fetch, decode, execution, and data memory access.
 - It exposes instruction and data memory interfaces to the memory subsystem and performance counter outputs for monitoring.
 
 ### DSP Subsystem
 
-- DSP-related modules are grouped under `rtl/` with file suffixes such as `_d.v`.
+- DSP-related modules are grouped under `rtl/` with dedicated accelerator filenames.
 - Key DSP blocks include:
-  - `dsp_d.v`
-  - `dspc_d.v`
-  - `mac_d.v`
-  - `simd_d.v`
+  - `rv64_ai_dsp_coprocessor.v`
+  - `rv64_ai_dsp_top.v`
+  - `rv64_ai_mac_engine.v`
+  - `rv64_ai_simd_engine.v`
   - `dspkg_d.v`
 - These units provide arithmetic and signal-processing capabilities that complement the core for high-throughput compute.
 
 ### TPU and AI Accelerators
 
-- AI/TPU accelerators are implemented in the `*_a.v` files.
+- AI/TPU accelerators are implemented in the dedicated `rv64_ai_*` files.
 - Important AI-related blocks include:
-  - `tpu_a.v`
-  - `tsa_a.v`
-  - `tdma_a.v`
-  - `xt_a.v`
+  - `rv64_ai_tpu_top.v`
+  - `rv64_ai_tpu_systolic_array.v`
+  - `rv64_ai_tpu_dma.v`
+  - `rv64_ai_xtensor_extension.v`
   - `tpupkg_a.v`
 - These modules support tensor processing, matrix operations, and accelerator-oriented data movement inside the SoC.
 
@@ -139,7 +143,7 @@ This section summarizes the main hardware components present in the SoC, includi
 
 ### Top-Level Integration
 
-- `rtl/soc_top_ps.v` stitches together all of the above subsystems into a single chip-level design.
+- `rtl/rv64_ai_soc_top.v` stitches together all of the above subsystems into a single chip-level design.
 - It routes the AXI-Lite-like control bus, distributes reset/init signals, and instantiates the core, memory subsystem, DSP/TPU accelerators, and peripheral blocks.
 - The top-level module is the main entry point for simulation and synthesis of the complete SoC.
 
@@ -215,13 +219,12 @@ This design targets a fully synthesizable RV64-AI-MCU SoC with advanced compute,
 
 ## Repository Structure
 
-The repository is organized into a small set of directories that separate documentation, RTL sources, verification, and synthesis outputs.
+The repository is organized into directories that separate documentation, RTL sources, verification, and synthesis outputs.
 
 ```text
 riscv/
 ├── LICENSE
 ├── README.md
-├── docs/                          # Additional documentation and notes
 ├── outputs/                       # Generated output artifacts
 │   ├── riscv_sim.vcd              # Simulation waveform output
 │   └── synopsys_outputs/          # Additional Synopsys-related outputs
@@ -232,51 +235,51 @@ riscv/
 │   ├── qor.txt
 │   └── timing.txt
 ├── rtl/                           # Main RTL source tree
-│   ├── adc_ps.v
-│   ├── brk_ps.v
-│   ├── can_ps.v
-│   ├── clk_ps.v
-│   ├── core_cm.v
-│   ├── crypto_ps.v
-│   ├── ctrl_cm.v
-│   ├── dbg_ps.v
-│   ├── dma_ps.v
-│   ├── dsp_d.v
-│   ├── dspc_d.v
 │   ├── dspkg_d.v
-│   ├── gpio_ps.v
-│   ├── i2c_ps.v
-│   ├── i2c2_ps.v
-│   ├── jtag_ps.v
-│   ├── mac_d.v
-│   ├── mem_bank.v
-│   ├── mem_cm.v
-│   ├── perf_ps.v
 │   ├── pkg_cm.v
-│   ├── plic_ps.v
-│   ├── pmp_ps.v
-│   ├── pwm_ps.v
-│   ├── qspi_ps.v
-│   ├── sec_ps.v
-│   ├── simd_d.v
-│   ├── soc_top_ps.v
-│   ├── spi_ps.v
-│   ├── spi2_ps.v
-│   ├── tdma_a.v
-│   ├── tpu_a.v
-│   ├── tpupkg_a.v
-│   ├── trace_ps.v
-│   ├── tsa_a.v
-│   ├── uart_ps.v
-│   ├── uart2_ps.v
-│   ├── usb_ps.v
-│   ├── xbar_cm.v
-│   └── xt_a.v
+│   ├── rv64_ai_adc_usb_can.v
+│   ├── rv64_ai_axi4lite_crossbar.v
+│   ├── rv64_ai_breakpoint_unit.v
+│   ├── rv64_ai_can_fd.v
+│   ├── rv64_ai_clock_sleep_wakeup.v
+│   ├── rv64_ai_control_unit.v
+│   ├── rv64_ai_core.v
+│   ├── rv64_ai_crypto_engine.v
+│   ├── rv64_ai_debug_module.v
+│   ├── rv64_ai_dma_sg.v
+│   ├── rv64_ai_dsp_coprocessor.v
+│   ├── rv64_ai_dsp_top.v
+│   ├── rv64_ai_gpio.v
+│   ├── rv64_ai_i2c.v
+│   ├── rv64_ai_i2c2.v
+│   ├── rv64_ai_jtag_debug.v
+│   ├── rv64_ai_mac_engine.v
+│   ├── rv64_ai_mem_bank.v
+│   ├── rv64_ai_memory_subsystem.v
+│   ├── rv64_ai_perf_counters.v
+│   ├── rv64_ai_plic_clint_debug.v
+│   ├── rv64_ai_pmp.v
+│   ├── rv64_ai_pwm_timer_wdt_rtc.v
+│   ├── rv64_ai_qspi_psram_dma.v
+│   ├── rv64_ai_security_block.v
+│   ├── rv64_ai_simd_engine.v
+│   ├── rv64_ai_soc_top.v
+│   ├── rv64_ai_spi.v
+│   ├── rv64_ai_spi2.v
+│   ├── rv64_ai_tpu_dma.v
+│   ├── rv64_ai_tpu_systolic_array.v
+│   ├── rv64_ai_tpu_top.v
+│   ├── rv64_ai_trace_buffer.v
+│   ├── rv64_ai_uart.v
+│   ├── rv64_ai_uart2.v
+│   ├── rv64_ai_usb_fs.v
+│   ├── rv64_ai_xtensor_extension.v
+│   └── tpupkg_a.v
 ├── scripts/                       # Synthesis automation scripts
-│   └── dc.tcl
-├── sdc/                            # Timing constraints for synthesis
+│   └── syn.tcl.tcl
+├── sdc/                           # Timing constraints for synthesis
 │   └── rv64_ai_soc_top.sdc
-└── tb/                             # Verification testbench
+└── tb/                            # Verification testbench
     └── tb.v
 ```
 
@@ -284,10 +287,10 @@ riscv/
 
 - `README.md` provides the project overview, setup notes, and contributor information.
 - `rtl/` contains the Verilog RTL source files. These are grouped by role:
-  - `*_cm.v` files are core and memory related.
-  - `*_d.v` files cover DSP functionality.
-  - `*_a.v` files represent AI and tensor-oriented accelerator blocks.
-  - `*_ps.v` files cover peripherals, security logic, and the SoC wrapper.
+  - Core, memory, and interconnect files include `rv64_ai_core.v`, `rv64_ai_control_unit.v`, `rv64_ai_memory_subsystem.v`, `rv64_ai_mem_bank.v`, `rv64_ai_axi4lite_crossbar.v`, and `pkg_cm.v`.
+  - DSP functionality includes the `rv64_ai_dsp_*`, `rv64_ai_mac_engine.v`, `rv64_ai_simd_engine.v`, and `dspkg_d.v` files.
+  - AI and tensor-oriented accelerator blocks include the `rv64_ai_tpu_*`, `rv64_ai_xtensor_extension.v`, and `tpupkg_a.v` files.
+  - Peripherals, security logic, debug, and system-control blocks use the `rv64_ai_*` filenames listed above.
 - `tb/` contains the primary testbench used to exercise the top-level SoC.
 - `scripts/` stores synthesis automation commands.
 - `sdc/` holds timing constraints for synthesis and timing analysis.
@@ -311,7 +314,7 @@ vvp sim_soc.out
 
 ### Current Status
 
-At the time of this update, the simulation flow is still failing during elaboration due to issues in `rtl/mem_cm.v` related to memory-bank output port handling. This is a useful next debugging target and should be resolved before the project can be considered fully verified in this environment.
+At the time of this update, the simulation flow is still failing during elaboration due to issues in `rtl/rv64_ai_memory_subsystem.v` related to memory-bank output port handling. This is a useful next debugging target and should be resolved before the project can be considered fully verified in this environment.
 
 ---
 
@@ -321,7 +324,7 @@ The repository is also prepared for a Synopsys Design Compiler handoff flow.
 
 ### Key Files
 
-- Synthesis script: `scripts/dc.tcl`
+- Synthesis script: `scripts/syn.tcl.tcl`
 - Constraint file: `sdc/rv64_ai_soc_top.sdc`
 - Reports: `reports/area.txt`, `reports/des.txt`, `reports/power.txt`, `reports/qor.txt`, `reports/timing.txt`
 - Waveform output: `outputs/riscv_sim.vcd`
@@ -342,7 +345,7 @@ To begin working with the project:
 
 ```sh
 cd /path/to/riscv
-dc_shell -f scripts/dc.tcl
+dc_shell -f scripts/syn.tcl.tcl
 ```
 
 > The synthesis script may need environment or path adjustments depending on your local setup.
